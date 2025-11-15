@@ -15,14 +15,26 @@ export function useAuth() {
         '/api/auth/login',
         credentials
       )
-      setAuth(response.user, response.token)
-      toast({
-        title: 'Success',
-        description: 'Logged in successfully',
-        variant: 'success',
-      })
-      router.push('/dashboard')
-      return response
+
+      // Check if login was successful
+      if (response.success && response.data) {
+        // Save user and token
+        setAuth(response.data.user, response.data.token)
+
+        // Show success message
+        toast({
+          title: 'Success',
+          description: response.message || 'Logged in successfully',
+          variant: 'success',
+        })
+
+        // Redirect to dashboard
+        router.push('/dashboard')
+
+        return response
+      } else {
+        throw new Error(response.message || 'Login failed')
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -39,14 +51,26 @@ export function useAuth() {
         '/api/auth/register',
         data
       )
-      setAuth(response.user, response.token)
-      toast({
-        title: 'Success',
-        description: 'Account created successfully',
-        variant: 'success',
-      })
-      router.push('/dashboard')
-      return response
+
+      // Check if registration was successful
+      if (response.success && response.data) {
+        // Save user and token
+        setAuth(response.data.user, response.data.token)
+
+        // Show success message
+        toast({
+          title: 'Success',
+          description: response.message || 'Account created successfully',
+          variant: 'success',
+        })
+
+        // Redirect to dashboard
+        router.push('/dashboard')
+
+        return response
+      } else {
+        throw new Error(response.message || 'Registration failed')
+      }
     } catch (error: any) {
       toast({
         title: 'Error',

@@ -10,8 +10,12 @@ export interface User {
 }
 
 export interface AuthResponse {
-  token: string
-  user: User
+  success: boolean
+  message: string
+  data: {
+    user: User
+    token: string
+  }
 }
 
 export interface LoginRequest {
@@ -35,7 +39,9 @@ export interface Category {
 }
 
 export interface CategoriesResponse {
-  categories: Category[]
+  success: boolean
+  count: number
+  data: Category[]
 }
 
 // Article Types
@@ -51,11 +57,14 @@ export interface Article {
 }
 
 export interface ArticlesResponse {
-  articles: Article[]
+  success: boolean
+  count: number
+  data: Article[]
 }
 
 export interface ArticleResponse {
-  article: Article
+  success: boolean
+  data: Article
 }
 
 // Survey Types (MCQ after article)

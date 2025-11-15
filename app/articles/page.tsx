@@ -24,8 +24,8 @@ export default function ArticlesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await apiClient.get<{ categories: Category[] }>('/api/categories')
-      setCategories(response.categories || [])
+      const response = await apiClient.get<{ success: boolean; data: Category[] }>('/api/categories')
+      setCategories(response.data || [])
     } catch (error) {
       console.error(error)
     }
@@ -37,8 +37,8 @@ export default function ArticlesPage() {
       const endpoint = categoryId
         ? `/api/articles/category/${categoryId}`
         : '/api/articles'
-      const response = await apiClient.get<{ articles: Article[] }>(endpoint)
-      setArticles(response.articles || [])
+      const response = await apiClient.get<{ success: boolean; data: Article[] }>(endpoint)
+      setArticles(response.data || [])
     } catch (error) {
       console.error(error)
     } finally {

@@ -31,8 +31,8 @@ export default function ArticlePage() {
 
   const fetchArticle = async () => {
     try {
-      const response = await apiClient.get<{ article: Article }>(`/api/articles/${params.id}`)
-      setArticle(response.article)
+      const response = await apiClient.get<{ success: boolean; data: Article }>(`/api/articles/${params.id}`)
+      setArticle(response.data)
     } catch (error) {
       console.error(error)
     } finally {

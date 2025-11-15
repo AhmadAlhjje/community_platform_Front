@@ -11,6 +11,13 @@ class APIClient {
 
   private getAuthToken(): string | null {
     if (typeof window === 'undefined') return null
+    // Get token from cookies
+    const cookies = document.cookie.split(';')
+    const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('auth_token='))
+    if (tokenCookie) {
+      return tokenCookie.split('=')[1]
+    }
+    // Fallback to localStorage for backwards compatibility
     return localStorage.getItem('auth_token')
   }
 
