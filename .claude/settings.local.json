@@ -7,7 +7,10 @@
       "Bash(cat:*)",
       "Bash(timeout 10 npm run dev:*)",
       "Bash(del \"d:\\zanobia\\community_platform_Front\\postcss.config.mjs\")",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(for file in \"d:\\zanobia\\community_platform_Front\\app\\games\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\polls\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\profile\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\leaderboard\\layout.tsx\")",
+      "Bash(do cat \"$file\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

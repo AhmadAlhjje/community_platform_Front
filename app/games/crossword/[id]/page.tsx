@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Trophy, CheckCircle, Award, Lightbulb, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Trophy, CheckCircle, Award, Lightbulb, RotateCcw, X } from 'lucide-react'
 import Link from 'next/link'
 
 export default function CrosswordPage() {
@@ -33,6 +33,18 @@ export default function CrosswordPage() {
   const fetchGame = async () => {
     try {
       const response = await apiClient.get<{ success: boolean; data: Game }>(`/api/games/${params.id}`)
+
+      // Check if game is already completed
+      if (response.data.isCompleted) {
+        toast({
+          title: 'تم إكمال هذه اللعبة مسبقاً',
+          description: 'لقد أكملت هذه اللعبة من قبل',
+          variant: 'default',
+        })
+        router.push('/games')
+        return
+      }
+
       setGame(response.data)
 
       const content: CrosswordData = JSON.parse(response.data.content)
@@ -103,15 +115,36 @@ export default function CrosswordPage() {
     newGrid[row][col] = arabicOnly.slice(-1)
     setUserGrid(newGrid)
 
-    // Auto-move to next cell
+    // Auto-move to next empty cell when a character is entered
     if (arabicOnly) {
-      // Try to move right first
-      if (col < grid[row].length - 1 && grid[row][col + 1] !== '#') {
-        setSelectedCell({ row, col: col + 1 })
+      // Use setTimeout to ensure state is updated before moving
+      setTimeout(() => {
+        moveToNextEmptyCell(row, col)
+      }, 0)
+    }
+  }
+
+  const moveToNextEmptyCell = (currentRow: number, currentCol: number) => {
+    // Try to find the next empty cell in the same row (right direction)
+    for (let col = currentCol + 1; col < grid[currentRow].length; col++) {
+      if (grid[currentRow][col] !== '#') {
+        setSelectedCell({ row: currentRow, col })
+        // Focus the input element
+        const input = document.querySelector(`input[data-row="${currentRow}"][data-col="${col}"]`) as HTMLInputElement
+        if (input) input.focus()
+        return
       }
-      // Try to move down
-      else if (row < grid.length - 1 && grid[row + 1][col] !== '#') {
-        setSelectedCell({ row: row + 1, col })
+    }
+
+    // If no empty cell in the same row, try to find in subsequent rows
+    for (let row = currentRow + 1; row < grid.length; row++) {
+      for (let col = 0; col < grid[row].length; col++) {
+        if (grid[row][col] !== '#') {
+          setSelectedCell({ row, col })
+          const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`) as HTMLInputElement
+          if (input) input.focus()
+          return
+        }
       }
     }
   }
@@ -173,8 +206,6 @@ export default function CrosswordPage() {
         description: `لقد أكملت اللعبة وربحت ${game.pointsReward} نقطة!`,
         variant: 'success',
       })
-
-      setTimeout(() => router.push('/games'), 3000)
     } catch (error: any) {
       toast({
         title: t('common.error'),
@@ -209,23 +240,71 @@ export default function CrosswordPage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           >
             <motion.div
-              animate={{
-                scale: [1, 1.1, 1],
-                rotate: [0, 5, -5, 0],
-              }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
-              className="bg-gradient-to-br from-blue-500 to-indigo-500 p-12 rounded-3xl shadow-2xl"
+              initial={{ y: 50 }}
+              animate={{ y: 0 }}
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden relative"
             >
-              <Trophy className="h-24 w-24 text-white mx-auto" />
-              <h2 className="text-3xl font-bold text-white text-center mt-4">
-                أحسنت!
-              </h2>
-              <p className="text-white/90 text-center mt-2">
-                +{game.pointsReward} نقطة
-              </p>
+              {/* Close Button */}
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="absolute top-4 left-4 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors"
+                aria-label="إغلاق"
+              >
+                <X className="h-6 w-6 text-white" />
+              </button>
+
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-500 p-8 text-center">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+                >
+                  <Trophy className="h-20 w-20 text-white mx-auto" />
+                </motion.div>
+                <h2 className="text-3xl font-bold text-white mt-4">
+                  أحسنت!
+                </h2>
+                <p className="text-xl text-white/90 mt-2">
+                  لقد أكملت اللعبة بنجاح
+                </p>
+                <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 inline-block mt-4">
+                  <p className="text-2xl font-bold text-white">
+                    +{game.pointsReward} نقطة
+                  </p>
+                </div>
+              </div>
+
+              {/* Educational Message */}
+              <div className="p-8">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-full">
+                      <Lightbulb className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">
+                        💡 الرسالة التعليمية
+                      </h3>
+                      <p className="text-lg text-amber-800 dark:text-amber-200 leading-relaxed">
+                        {game.educationalMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => router.push('/games')}
+                  className="w-full mt-6 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-6 text-lg"
+                  size="lg"
+                >
+                  العودة إلى الألعاب
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -237,10 +316,17 @@ export default function CrosswordPage() {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <CardTitle className="text-2xl mb-2">{game.title}</CardTitle>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" />
-                {game.educationalMessage}
-              </p>
+              {!completed && (
+                <p className="text-muted-foreground text-sm">
+                  أكمل جميع الكلمات لمعرفة الرسالة التعليمية
+                </p>
+              )}
+              {completed && (
+                <p className="text-muted-foreground flex items-center gap-2 mt-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  {game.educationalMessage}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-full">
               <Award className="h-4 w-4" />
@@ -279,6 +365,8 @@ export default function CrosswordPage() {
                           onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
                           disabled={isBlocked || completed}
                           maxLength={1}
+                          data-row={rowIndex}
+                          data-col={colIndex}
                           className={`
                             w-10 h-10 sm:w-12 sm:h-12 text-center text-base sm:text-lg font-bold border-2 uppercase
                             transition-all duration-200
@@ -410,15 +498,30 @@ export default function CrosswordPage() {
           animate={{ opacity: 1, scale: 1 }}
         >
           <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-900/20">
-            <CardContent className="pt-6 text-center">
-              <Trophy className="h-16 w-16 text-green-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-2">تم إكمال اللعبة!</h3>
+            <CardContent className="pt-6 text-center space-y-4">
+              <Trophy className="h-16 w-16 text-green-600 mx-auto" />
+              <h3 className="text-2xl font-bold">تم إكمال اللعبة!</h3>
               <p className="text-muted-foreground">
                 لقد حللت جميع الكلمات بنجاح
               </p>
-              <p className="text-lg font-bold text-green-600 mt-2">
+              <p className="text-lg font-bold text-green-600">
                 +{game.pointsReward} نقطة
               </p>
+
+              {/* Educational Message */}
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg mt-4">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                      الرسالة التعليمية
+                    </p>
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      {game.educationalMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>

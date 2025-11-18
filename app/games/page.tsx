@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
 import { Game } from '@/types/api'
 import { useTranslation } from '@/hooks/use-translation'
+import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy } from 'lucide-react'
@@ -14,6 +15,8 @@ export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const { t } = useTranslation()
+  const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchGames()
@@ -32,6 +35,20 @@ export default function GamesPage() {
 
   const puzzleGames = games.filter((g) => g.type === 'puzzle')
   const crosswordGames = games.filter((g) => g.type === 'crossword')
+
+  const handlePlayGame = (game: Game) => {
+    if (game.isCompleted) {
+      toast({
+        title: 'تم إكمال هذه اللعبة مسبقاً',
+        description: 'لقد أكملت هذه اللعبة من قبل ولا يمكنك لعبها مرة أخرى',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const gameLink = game.type === 'puzzle' ? `/games/puzzle/${game.id}` : `/games/crossword/${game.id}`
+    router.push(gameLink)
+  }
 
   const GameIcon = ({ type }: { type: 'puzzle' | 'crossword' }) => {
     if (type === 'puzzle') {
@@ -56,7 +73,6 @@ export default function GamesPage() {
 
   const GameCard = ({ game, index }: { game: Game; index: number }) => {
     const isPuzzle = game.type === 'puzzle'
-    const gameLink = isPuzzle ? `/games/puzzle/${game.id}` : `/games/crossword/${game.id}`
 
     return (
       <motion.div
@@ -105,28 +121,26 @@ export default function GamesPage() {
           </CardHeader>
 
           <CardContent className="mt-auto relative">
-            <Link href={gameLink}>
-              <Button
-                className={`w-full group-hover:scale-105 transition-transform ${
-                  isPuzzle
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-                }`}
-                disabled={game.isCompleted}
-              >
-                {game.isCompleted ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 ml-2" />
-                    تم الإكمال
-                  </>
-                ) : (
-                  <>
-                    <Star className="h-4 w-4 ml-2" />
-                    العب الآن
-                  </>
-                )}
-              </Button>
-            </Link>
+            <Button
+              onClick={() => handlePlayGame(game)}
+              className={`w-full group-hover:scale-105 transition-transform ${
+                isPuzzle
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
+              }`}
+            >
+              {game.isCompleted ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 ml-2" />
+                  تم الإكمال
+                </>
+              ) : (
+                <>
+                  <Star className="h-4 w-4 ml-2" />
+                  العب الآن
+                </>
+              )}
+            </Button>
           </CardContent>
         </Card>
       </motion.div>

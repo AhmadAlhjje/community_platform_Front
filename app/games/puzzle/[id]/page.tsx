@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Trophy, Lightbulb, Award, Sparkles, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Trophy, Lightbulb, Award, Sparkles, RotateCcw, X } from 'lucide-react'
 import Link from 'next/link'
 
 interface PuzzleData {
@@ -38,6 +38,18 @@ export default function PuzzlePage() {
   const fetchGame = async () => {
     try {
       const response = await apiClient.get<{ success: boolean; data: Game }>(`/api/games/${params.id}`)
+
+      // Check if game is already completed
+      if (response.data.isCompleted) {
+        toast({
+          title: 'تم إكمال هذه اللعبة مسبقاً',
+          description: 'لقد أكملت هذه اللعبة من قبل',
+          variant: 'default',
+        })
+        router.push('/games')
+        return
+      }
+
       setGame(response.data)
 
       // Parse the content JSON
@@ -135,8 +147,6 @@ export default function PuzzlePage() {
         description: `لقد أكملت اللعبة في ${moves} حركة وربحت ${game.pointsReward} نقطة!`,
         variant: 'success',
       })
-
-      setTimeout(() => router.push('/games'), 3000)
     } catch (error: any) {
       toast({
         title: t('common.error'),
@@ -184,23 +194,79 @@ export default function PuzzlePage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           >
             <motion.div
-              animate={{
-                scale: [1, 1.1, 1],
-                rotate: [0, 10, -10, 0],
-              }}
-              transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 0.8 }}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 p-12 rounded-3xl shadow-2xl"
+              initial={{ y: 50 }}
+              animate={{ y: 0 }}
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden relative"
             >
-              <Trophy className="h-24 w-24 text-white mx-auto" />
-              <h2 className="text-3xl font-bold text-white text-center mt-4">
-                رائع!
-              </h2>
-              <p className="text-white/90 text-center mt-2">
-                {moves} حركة | +{game.pointsReward} نقطة
-              </p>
+              {/* Close Button */}
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="absolute top-4 left-4 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors"
+                aria-label="إغلاق"
+              >
+                <X className="h-6 w-6 text-white" />
+              </button>
+
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-8 text-center">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 5, -5, 0],
+                  }}
+                  transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 1 }}
+                >
+                  <Trophy className="h-20 w-20 text-white mx-auto" />
+                </motion.div>
+                <h2 className="text-3xl font-bold text-white mt-4">
+                  رائع!
+                </h2>
+                <p className="text-xl text-white/90 mt-2">
+                  لقد أكملت اللعبة بنجاح
+                </p>
+                <div className="flex gap-4 justify-center mt-4">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2">
+                    <p className="text-lg font-bold text-white">
+                      {moves} حركة
+                    </p>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2">
+                    <p className="text-lg font-bold text-white">
+                      +{game.pointsReward} نقطة
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Educational Message */}
+              <div className="p-8">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-full">
+                      <Lightbulb className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">
+                        💡 الرسالة التعليمية
+                      </h3>
+                      <p className="text-lg text-amber-800 dark:text-amber-200 leading-relaxed">
+                        {game.educationalMessage}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => router.push('/games')}
+                  className="w-full mt-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
+                  size="lg"
+                >
+                  العودة إلى الألعاب
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -218,10 +284,17 @@ export default function PuzzlePage() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <CardTitle className="text-2xl mb-2">{game.title}</CardTitle>
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4" />
-                  {game.educationalMessage}
-                </p>
+                {!completed && (
+                  <p className="text-muted-foreground text-sm">
+                    أكمل اللعبة لمعرفة الرسالة التعليمية
+                  </p>
+                )}
+                {completed && (
+                  <p className="text-muted-foreground flex items-center gap-2 mt-2">
+                    <Lightbulb className="h-4 w-4 text-amber-500" />
+                    {game.educationalMessage}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-full">
                 <Award className="h-4 w-4" />
@@ -332,24 +405,62 @@ export default function PuzzlePage() {
         </Card>
       </motion.div>
 
+      {/* Completion Message */}
+      {completed && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
+            <CardContent className="pt-6 text-center space-y-4">
+              <Trophy className="h-16 w-16 text-purple-600 mx-auto" />
+              <h3 className="text-2xl font-bold">تم إكمال اللعبة!</h3>
+              <p className="text-muted-foreground">
+                لقد أكملت اللعبة في {moves} حركة
+              </p>
+              <p className="text-lg font-bold text-purple-600">
+                +{game.pointsReward} نقطة
+              </p>
+
+              {/* Educational Message */}
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg mt-4">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                      الرسالة التعليمية
+                    </p>
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      {game.educationalMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Instructions */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">كيفية اللعب</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>• انقر على القطع المجاورة للمربع الفارغ لتحريكها</p>
-            <p>• رتب الأرقام من 0 إلى {puzzleData.pieces - 1} بالترتيب</p>
-            <p>• القطع المحاطة بحلقة بنفسجية يمكن تحريكها</p>
-            <p>• أكمل الترتيب الصحيح لربح النقاط!</p>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {!completed && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">كيفية اللعب</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>• انقر على القطع المجاورة للمربع الفارغ لتحريكها</p>
+              <p>• رتب الأرقام من 0 إلى {puzzleData.pieces - 1} بالترتيب</p>
+              <p>• القطع المحاطة بحلقة بنفسجية يمكن تحريكها</p>
+              <p>• أكمل الترتيب الصحيح لربح النقاط!</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   )
 }
