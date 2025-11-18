@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { apiClient } from '@/lib/api-client'
-import { Article, Survey, SurveyResult } from '@/types/api'
+import { Article, Survey, SurveyResponse, SurveySubmitResponse } from '@/types/api'
 import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +19,7 @@ export default function ArticlePage() {
   const [survey, setSurvey] = useState<Survey | null>(null)
   const [showQuiz, setShowQuiz] = useState(false)
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({})
-  const [result, setResult] = useState<SurveyResult | null>(null)
+  const [result, setResult] = useState<SurveySubmitResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -42,27 +42,19 @@ export default function ArticlePage() {
 
   const fetchSurvey = async () => {
     try {
-      const response = await apiClient.get<{ survey: Survey }>(
+      const response = await apiClient.get<SurveyResponse>(
         `/api/surveys/article/${params.id}`
       )
-      setSurvey(response.survey)
+      if (response.success && response.data) {
+        setSurvey(response.data)
+      }
     } catch (error) {
       console.error(error)
     }
   }
 
-  const handleMarkAsRead = async () => {
-    try {
-      await apiClient.post(`/api/articles/${params.id}/read`, {}, true)
-      setShowQuiz(true)
-      toast({
-        title: t('common.success'),
-        description: '+5 نقاط للقراءة',
-        variant: 'success',
-      })
-    } catch (error: any) {
-      console.error(error)
-    }
+  const handleFinishReading = () => {
+    setShowQuiz(true)
   }
 
   const handleSubmitQuiz = async () => {
@@ -74,17 +66,25 @@ export default function ArticlePage() {
     }))
 
     try {
-      const response = await apiClient.post<{ result: SurveyResult }>(
+      const response = await apiClient.post<SurveySubmitResponse>(
         `/api/surveys/${survey.id}/submit`,
         { answers },
         true
       )
-      setResult(response.result)
-      toast({
-        title: response.result.passed ? t('articles.passed') : t('articles.failed'),
-        description: `${t('articles.yourScore')}: ${response.result.score}/${response.result.totalQuestions}`,
-        variant: response.result.passed ? 'success' : 'destructive',
-      })
+
+      if (response.success && response.data) {
+        setResult(response.data)
+
+        const pointsMessage = response.data.passed
+          ? `مبروك! لقد حصلت على ${response.data.points} نقطة`
+          : 'للأسف، تحتاج إلى 70% على الأقل للحصول على النقاط'
+
+        toast({
+          title: response.data.passed ? 'نجحت!' : 'حاول مرة أخرى',
+          description: pointsMessage,
+          variant: response.data.passed ? 'success' : 'destructive',
+        })
+      }
     } catch (error: any) {
       toast({
         title: t('common.error'),
@@ -110,23 +110,43 @@ export default function ArticlePage() {
             <div className="flex items-center justify-center mb-4">
               <CheckCircle2
                 className={`h-16 w-16 ${
-                  result.passed ? 'text-success' : 'text-destructive'
+                  result.passed ? 'text-green-500' : 'text-red-500'
                 }`}
               />
             </div>
-            <CardTitle className="text-center">
-              {result.passed ? t('articles.passed') : t('articles.failed')}
+            <CardTitle className="text-center text-2xl">
+              {result.passed ? 'نجحت!' : 'حاول مرة أخرى'}
             </CardTitle>
-            <CardDescription className="text-center text-lg">
-              {t('articles.yourScore')}: {result.score}/{result.totalQuestions} (
-              {result.percentage.toFixed(0)}%)
+            <CardDescription className="text-center text-lg mt-2">
+              النتيجة: {result.correctAnswers}/{result.totalQuestions} ({result.percentage.toFixed(0)}%)
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="bg-muted p-4 rounded-lg text-center">
+              {result.passed ? (
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                    مبروك! لقد حصلت على {result.points} نقطة
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    لقد حصلت على أكثر من 70% من الإجابات الصحيحة
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                    تحتاج إلى 70% على الأقل للحصول على النقاط
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    نتيجتك: {result.percentage.toFixed(0)}% - حاول مرة أخرى
+                  </p>
+                </div>
+              )}
+            </div>
             <Link href="/articles">
               <Button className="w-full">
                 <ArrowLeft className="h-4 w-4 ml-2" />
-                {t('articles.backToArticles')}
+                العودة إلى المقالات
               </Button>
             </Link>
           </CardContent>
@@ -209,9 +229,9 @@ export default function ArticlePage() {
         </CardContent>
       </Card>
 
-      {!article.hasRead && survey && (
-        <Button className="w-full" size="lg" onClick={handleMarkAsRead}>
-          {t('articles.takeQuiz')}
+      {survey && (
+        <Button className="w-full" size="lg" onClick={handleFinishReading}>
+          الانتهاء من القراءة
         </Button>
       )}
     </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut } from 'lucide-react'
@@ -9,11 +10,35 @@ import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { apiClient } from '@/lib/api-client'
 
 export function Navbar() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { t } = useTranslation()
+  const [currentPoints, setCurrentPoints] = useState(user?.points || 0)
+
+  // Update points when user changes or when navigating
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserPoints()
+    }
+  }, [user?.id, pathname])
+
+  const fetchUserPoints = async () => {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: { points: number } }>(
+        `/api/users/${user?.id}/points`,
+        true
+      )
+      if (response.success && response.data) {
+        setCurrentPoints(response.data.points)
+      }
+    } catch (error) {
+      // Fallback to user.points if API call fails
+      setCurrentPoints(user?.points || 0)
+    }
+  }
 
   const navItems = [
     { href: '/dashboard', label: t('common.home'), icon: Home },
@@ -56,7 +81,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {user && (
             <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-accent">
-              <span className="text-sm font-medium">{user.points}</span>
+              <span className="text-sm font-medium">{currentPoints}</span>
               <span className="text-xs text-muted-foreground">
                 {t('common.points')}
               </span>

@@ -71,7 +71,6 @@ export interface ArticleResponse {
 export interface SurveyOption {
   id: string
   optionText: string
-  isCorrect: boolean
 }
 
 export interface SurveyQuestion {
@@ -85,12 +84,11 @@ export interface Survey {
   articleId: string
   title: string
   questions: SurveyQuestion[]
-  createdAt: string
-  updatedAt: string
 }
 
 export interface SurveyResponse {
-  survey: Survey
+  success: boolean
+  data: Survey
 }
 
 export interface SurveyAnswer {
@@ -102,77 +100,96 @@ export interface SurveySubmitRequest {
   answers: SurveyAnswer[]
 }
 
-export interface SurveyResult {
-  score: number
-  totalQuestions: number
-  percentage: number
-  passed: boolean
-  pointsEarned: number
-}
-
-export interface SurveyResultResponse {
-  result: SurveyResult
-  userAnswers?: {
-    questionId: string
-    selectedOptionId: string
-    isCorrect: boolean
-  }[]
-}
-
-// Poll Types (for voting on problems)
-export interface Poll {
-  id: string
-  question: string
-  options: string[]
-  votes: { [option: string]: number }
-  endDate: string
-  createdAt: string
-  updatedAt: string
-  hasVoted?: boolean
-  userVote?: string
-}
-
-export interface PollsResponse {
-  polls: Poll[]
-}
-
-export interface PollResponse {
-  poll: Poll
-}
-
-export interface PollVoteRequest {
-  option: string
-}
-
-export interface PollResultsResponse {
-  results: {
-    option: string
-    votes: number
+export interface SurveySubmitResponse {
+  success: boolean
+  message: string
+  data: {
+    points: number
     percentage: number
-  }[]
-  totalVotes: number
+    passed: boolean
+    correctAnswers: number
+    totalQuestions: number
+  }
 }
 
-// Discussion Session Types (Google Meet)
-export interface DiscussionSession {
+// Discussion Session Types
+export interface DiscussionAttendance {
+  id: string
+  userId: string
+  attended: boolean
+}
+
+export interface DiscussionAdmin {
+  id: string
+  name: string
+}
+
+export interface Discussion {
   id: string
   title: string
   description: string
-  meetLink?: string
-  scheduledDate: string
-  duration: number
-  status: 'upcoming' | 'active' | 'ended'
+  meetLink: string
+  dateTime: string
+  pointsReward: number
+  adminId: string
   createdAt: string
   updatedAt: string
-  hasAttended?: boolean
+  admin: DiscussionAdmin
+  attendances: DiscussionAttendance[]
 }
 
-export interface DiscussionSessionsResponse {
-  sessions: DiscussionSession[]
+export interface DiscussionsResponse {
+  success: boolean
+  count: number
+  data: Discussion[]
 }
 
-export interface DiscussionSessionResponse {
-  session: DiscussionSession
+// Poll Types (for discussion sessions)
+export interface PollOption {
+  id: string
+  optionText: string
+  voteCount: number
+}
+
+export interface SessionPoll {
+  id: string
+  sessionId: string
+  title: string
+  endDate: string
+  isActive: boolean
+  pointsReward: number
+  createdAt: string
+  updatedAt: string
+  options: PollOption[]
+}
+
+export interface SessionPollResponse {
+  success: boolean
+  data: SessionPoll
+}
+
+export interface PollVoteRequest {
+  optionId: string
+}
+
+export interface PollVoteResponse {
+  success: boolean
+  message: string
+  data: {
+    points: number
+  }
+}
+
+// Discussion Meet Link Types
+export interface MeetLinkResponse {
+  success: boolean
+  message?: string
+  data?: {
+    sessionId: string
+    title: string
+    meetLink: string
+    dateTime: string
+  }
 }
 
 // Game Types
@@ -185,38 +202,66 @@ export interface PuzzleData {
   solution?: string
 }
 
-export interface CrosswordClue {
+export interface CrosswordWord {
   number: number
   direction: 'across' | 'down'
-  clue: string
+  question: string
   answer: string
-  startRow?: number
-  startCol?: number
+  position: {
+    row: number
+    col: number
+  }
 }
 
 export interface CrosswordData {
-  clues: CrosswordClue[]
-  grid?: string[][]
+  words: CrosswordWord[]
 }
 
 export interface Game {
   id: string
-  title: string
-  description: string
   type: GameType
-  difficulty: GameDifficulty
-  gameData: PuzzleData | CrosswordData
+  title: string
+  content: string
+  educationalMessage: string
+  pointsReward: number
   createdAt: string
   updatedAt: string
   isCompleted?: boolean
 }
 
 export interface GamesResponse {
-  games: Game[]
+  success: boolean
+  count: number
+  data: Game[]
 }
 
 export interface GameResponse {
-  game: Game
+  success: boolean
+  data: Game
+}
+
+export interface UserGameHistory {
+  id: string
+  userId: string
+  gameId: string
+  completed: boolean
+  pointsEarned: number
+  completedAt: string
+  createdAt: string
+  updatedAt: string
+  game: {
+    id: string
+    type: GameType
+    title: string
+    educationalMessage: string
+  }
+}
+
+export interface UserGameHistoryResponse {
+  success: boolean
+  count: number
+  totalPoints: number
+  data: UserGameHistory[]
 }
 
 export interface GameCompleteRequest {
@@ -255,25 +300,42 @@ export interface UserActivity {
 }
 
 export interface UserPointsResponse {
-  points: number
-  breakdown: {
-    articles: number
-    games: number
-    polls: number
-    discussions: number
+  success: boolean
+  data: {
+    id: string
+    name: string
+    points: number
+    rank: number
+  }
+}
+
+export interface UserDetailsResponse {
+  success: boolean
+  data: {
+    id: string
+    name: string
+    email: string
+    points: number
+    role: string
+    createdAt: string
+    updatedAt: string
   }
 }
 
 // Leaderboard Types
 export interface LeaderboardEntry {
-  userId: string
-  userName: string
-  points: number
   rank: number
+  id: string
+  name: string
+  email: string
+  points: number
+  memberSince: string
 }
 
 export interface LeaderboardResponse {
-  leaderboard: LeaderboardEntry[]
+  success: boolean
+  count: number
+  data: LeaderboardEntry[]
 }
 
 // API Error
