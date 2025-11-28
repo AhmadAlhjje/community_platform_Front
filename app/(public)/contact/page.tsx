@@ -101,22 +101,22 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: 'البريد الإلكتروني',
-      description: 'info@platform.com'
+      description: 'ahmadobadaalhjje@gmail.com'
     },
     {
       icon: Phone,
       title: 'الهاتف',
-      description: '+966 50 123 4567'
+      description: '+963998107722'
     },
     {
       icon: MapPin,
       title: 'العنوان',
-      description: 'الرياض، المملكة العربية السعودية'
+      description: 'سوريا _ حلب'
     },
     {
       icon: Clock,
       title: 'ساعات العمل',
-      description: 'من الأحد إلى الخميس، 9ص - 6م'
+      description: 'من الأحد إلى الخميس، 9ص - 5م'
     },
   ]
 
@@ -328,10 +328,6 @@ export default function ContactPage() {
               {
                 q: 'كم وقت يستغرق الرد على رسائلي؟',
                 a: 'نحاول الرد على جميع الرسائل خلال 24 ساعة'
-              },
-              {
-                q: 'هل يمكنني استخدام المنصة بدون إنشاء حساب؟',
-                a: 'نعم، يمكنك استعراض بعض المحتوى بدون حساب، لكن لتجربة كامل المميزات تحتاج لحساب'
               },
               {
                 q: 'هل هناك رسوم للاشتراك في المنصة؟',
