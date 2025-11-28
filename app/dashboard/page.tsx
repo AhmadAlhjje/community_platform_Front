@@ -43,12 +43,12 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">مرحباً، {user?.name}!</h1>
+    <div className="w-full min-h-screen space-y-8">
+      <div className="w-full">
+        <h1 className="text-3xl font-bold text-foreground">مرحباً، {user?.name}!</h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {activities.map((activity, index) => {
           const Icon = activity.icon
           return (

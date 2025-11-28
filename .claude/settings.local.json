@@ -10,7 +10,10 @@
       "Bash(rm:*)",
       "Bash(for file in \"d:\\zanobia\\community_platform_Front\\app\\games\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\polls\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\profile\\layout.tsx\" \"d:\\zanobia\\community_platform_Front\\app\\leaderboard\\layout.tsx\")",
       "Bash(do cat \"$file\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
