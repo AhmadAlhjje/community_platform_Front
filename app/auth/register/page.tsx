@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { UserPlus, ArrowRight, Sparkles } from 'lucide-react'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -33,76 +34,174 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute top-4 left-4 flex gap-2">
-        <ThemeSwitcher />
-        <LanguageSwitcher />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 sm:p-6">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-sm">م</span>
+          </div>
+          <span className="text-lg font-bold hidden sm:inline">{t('common.appName')}</span>
+        </Link>
+        <div className="flex gap-2">
+          <ThemeSwitcher />
+          <LanguageSwitcher />
+        </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
-              {t('auth.registerTitle')}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {t('common.appName')}
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t('auth.name')}</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="أحمد محمد"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl">
+          {/* Left Side - Info */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="hidden lg:flex flex-col justify-center space-y-8"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground">مرحباً بك!</h2>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.email')}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="ahmed@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">{t('auth.password')}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? t('common.loading') : t('auth.registerButton')}
-              </Button>
-              <p className="text-sm text-center text-muted-foreground">
-                {t('auth.alreadyHaveAccount')}{' '}
-                <Link href="/auth/login" className="text-primary hover:underline">
-                  {t('auth.loginHere')}
-                </Link>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                إنشاء حساب جديد بسيط وسريع. ابدأ رحلتك التعليمية معنا الآن
               </p>
-            </CardFooter>
-          </form>
-        </Card>
-      </motion.div>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                { icon: '🚀', title: 'ابدأ فوراً', desc: 'إنشاء حساب في أقل من دقيقة' },
+                { icon: '🔒', title: 'آمن وموثوق', desc: 'بيانات آمنة ومحمية تماماً' },
+                { icon: '🌟', title: 'مميزات رائعة', desc: 'تمتع بجميع مميزات المنصة' },
+              ].map((item, index) => (
+                <div key={index} className="flex gap-3">
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
+                    <p className="font-semibold text-foreground">{item.title}</p>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Right Side - Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full"
+          >
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="space-y-2 pb-6">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <UserPlus className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <CardTitle className="text-3xl text-center text-foreground">
+                  {t('auth.registerTitle')}
+                </CardTitle>
+                <CardDescription className="text-center text-base">
+                  أنشئ حساباً جديداً لتبدأ التعلم
+                </CardDescription>
+              </CardHeader>
+
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-5 pb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-foreground font-medium">
+                      {t('auth.name')}
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="أدخل اسمك الكامل"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-11 text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground font-medium">
+                      {t('auth.email')}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="أدخل بريدك الإلكتروني"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-foreground font-medium">
+                      {t('auth.password')}
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="أدخل كلمة المرور (8 أحرف على الأقل)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-11 text-base"
+                      required
+                    />
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex flex-col gap-4 pt-2">
+                  <Button
+                    type="submit"
+                    className="w-full h-11 text-base font-medium"
+                    disabled={loading}
+                  >
+                    {loading ? t('common.loading') : t('auth.registerButton')}
+                    {!loading && <ArrowRight className="h-4 w-4 ml-2" />}
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-card text-muted-foreground">
+                        هل لديك حساب بالفعل؟
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link href="/auth/login" className="w-full">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-11 text-base font-medium"
+                    >
+                      {t('auth.loginHere')}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </form>
+            </Card>
+
+            <p className="text-sm text-center text-muted-foreground mt-6">
+              بالتسجيل تقبل{' '}
+              <Link href="/" className="text-primary hover:underline">
+                شروط الاستخدام
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -88,7 +88,7 @@ export function useAuth() {
       description: 'Logged out successfully',
       variant: 'success',
     })
-    router.push('/auth/login')
+    router.push('/')
   }
 
   const getProfile = async () => {

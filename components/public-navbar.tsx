@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 import { apiClient } from '@/lib/api-client'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export function Navbar() {
+export function PublicNavbar() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { t } = useTranslation()
@@ -72,7 +72,8 @@ export function Navbar() {
     { href: '/contact', label: 'تواصل معنا', icon: Mail },
   ]
 
-  const navItems = [...mainNavItems, ...publicNavItems]
+  // If logged in, show authenticated navbar, otherwise show public navbar
+  const navItems = user ? [...mainNavItems, ...publicNavItems] : publicNavItems
 
   return (
     <>
@@ -143,7 +144,7 @@ export function Navbar() {
                 <LanguageSwitcher />
               </div>
 
-              {/* Logout Button - Desktop */}
+              {/* Logout Button - Desktop (Only for logged in users) */}
               {user && (
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
@@ -156,6 +157,15 @@ export function Navbar() {
                     <LogOut className="h-5 w-5" />
                   </Button>
                 </motion.div>
+              )}
+
+              {/* Login Button - Desktop (Only for non-logged in users) */}
+              {!user && (
+                <Link href="/auth/login" className="hidden sm:block">
+                  <Button variant="default" size="sm">
+                    دخول
+                  </Button>
+                </Link>
               )}
 
               {/* Mobile Menu Button */}
@@ -244,38 +254,42 @@ export function Navbar() {
               {/* Navigation Links */}
               <div className="flex-1 overflow-y-auto py-4 px-2">
                 <div className="space-y-1">
-                  {/* Main navigation section */}
-                  <div className="mb-3">
-                    {mainNavItems.map((item, index) => {
-                      const Icon = item.icon
-                      const isActive = pathname === item.href
-                      return (
-                        <motion.div
-                          key={item.href}
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <Link
-                            href={item.href}
-                            className={cn(
-                              'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200',
-                              isActive
-                                ? 'bg-primary text-primary-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                            )}
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
-                            <span className="flex-1">{item.label}</span>
-                          </Link>
-                        </motion.div>
-                      )
-                    })}
-                  </div>
+                  {user && (
+                    <>
+                      {/* Main navigation section */}
+                      <div className="mb-3">
+                        {mainNavItems.map((item, index) => {
+                          const Icon = item.icon
+                          const isActive = pathname === item.href
+                          return (
+                            <motion.div
+                              key={item.href}
+                              initial={{ opacity: 0, x: 10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                            >
+                              <Link
+                                href={item.href}
+                                className={cn(
+                                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200',
+                                  isActive
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                                )}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                <span className="flex-1">{item.label}</span>
+                              </Link>
+                            </motion.div>
+                          )
+                        })}
+                      </div>
 
-                  {/* Divider */}
-                  <div className="my-2 border-t border-border" />
+                      {/* Divider */}
+                      <div className="my-2 border-t border-border" />
+                    </>
+                  )}
 
                   {/* Public pages section */}
                   <div>
@@ -287,7 +301,7 @@ export function Navbar() {
                           key={item.href}
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (mainNavItems.length + index) * 0.05 }}
+                          transition={{ delay: (user ? mainNavItems.length : 0) + index * 0.05 }}
                         >
                           <Link
                             href={item.href}
@@ -316,7 +330,8 @@ export function Navbar() {
                   <div className="w-px h-5 bg-border" />
                   <LanguageSwitcher />
                 </div>
-                {user && (
+
+                {user ? (
                   <Button
                     variant="outline"
                     className="w-full justify-center gap-2 font-medium"
@@ -328,6 +343,12 @@ export function Navbar() {
                     <LogOut className="h-4 w-4" />
                     {t('common.logout')}
                   </Button>
+                ) : (
+                  <Link href="/auth/login" className="w-full">
+                    <Button variant="default" className="w-full justify-center gap-2 font-medium">
+                      دخول
+                    </Button>
+                  </Link>
                 )}
               </div>
             </motion.div>

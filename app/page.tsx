@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Button } from '@/components/ui/button'
+import { PublicNavbar } from '@/components/public-navbar'
 import { BookOpen, Gamepad2, MessageSquare, Trophy, Sparkles, ArrowRight } from 'lucide-react'
 
 const FeatureCard = ({ icon: Icon, title, description, delay }: any) => (
@@ -67,22 +68,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">م</span>
-            </div>
-            <span className="text-lg font-bold">{t('common.appName')}</span>
-          </Link>
-          <Link href="/auth/login">
-            <Button variant="default" size="sm">
-              دخول
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <PublicNavbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-12 md:py-20 border-b">
