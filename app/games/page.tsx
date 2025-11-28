@@ -53,20 +53,14 @@ export default function GamesPage() {
   const GameIcon = ({ type }: { type: 'puzzle' | 'crossword' }) => {
     if (type === 'puzzle') {
       return (
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25"></div>
-          <div className="relative bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-lg">
-            <Puzzle className="h-8 w-8 text-white" />
-          </div>
+        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <Puzzle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>
       )
     }
     return (
-      <div className="relative">
-        <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg blur opacity-25"></div>
-        <div className="relative bg-gradient-to-br from-green-500 to-emerald-500 p-3 rounded-lg">
-          <Grid3x3 className="h-8 w-8 text-white" />
-        </div>
+      <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+        <Grid3x3 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
       </div>
     )
   }
@@ -79,14 +73,14 @@ export default function GamesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        whileHover={{ y: -5 }}
+        whileHover={{ y: -4 }}
         className="h-full"
       >
-        <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-          <div className={`absolute inset-0 bg-gradient-to-br ${
+        <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+          <div className={`absolute inset-0 ${
             isPuzzle
-              ? 'from-purple-500/5 to-pink-500/5'
-              : 'from-green-500/5 to-emerald-500/5'
+              ? 'bg-blue-500/5'
+              : 'bg-emerald-500/5'
           } opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
 
           <CardHeader className="relative">
@@ -104,17 +98,17 @@ export default function GamesPage() {
               )}
             </div>
 
-            <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
+            <CardTitle className="text-lg line-clamp-2 text-foreground">
               {game.title}
             </CardTitle>
 
-            <CardDescription className="line-clamp-2 text-sm">
+            <CardDescription className="line-clamp-2 text-sm mt-2">
               {game.educationalMessage}
             </CardDescription>
 
-            <div className="flex items-center gap-2 mt-3">
+            <div className="flex items-center gap-2 mt-4">
               <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-medium">
-                <Award className="h-3 w-3" />
+                <Trophy className="h-3 w-3" />
                 {game.pointsReward} نقطة
               </div>
             </div>
@@ -123,11 +117,8 @@ export default function GamesPage() {
           <CardContent className="mt-auto relative">
             <Button
               onClick={() => handlePlayGame(game)}
-              className={`w-full group-hover:scale-105 transition-transform ${
-                isPuzzle
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-              }`}
+              className="w-full transition-all"
+              variant={game.isCompleted ? 'outline' : 'default'}
             >
               {game.isCompleted ? (
                 <>
@@ -157,24 +148,22 @@ export default function GamesPage() {
   }
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="w-full min-h-screen space-y-8 pb-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative"
       >
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-green-600 rounded-lg blur opacity-20"></div>
-        <div className="relative bg-background border rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
-              <Trophy className="h-6 w-6 text-white" />
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-foreground">
               {t('games.title')}
             </h1>
           </div>
-          <p className="text-muted-foreground mr-11">
-            اختر لعبة واستمتع بالتعلم واكسب النقاط
+          <p className="text-muted-foreground text-lg">
+            اختر لعبة واستمتع بالتعلم واكسب النقاط بطريقة تفاعلية وممتعة
           </p>
         </div>
       </motion.div>
@@ -184,13 +173,13 @@ export default function GamesPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
+          className="space-y-6"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg">
-              <Puzzle className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <Puzzle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <h2 className="text-2xl font-bold">ألعاب الأحجية</h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-purple-500/50 to-transparent"></div>
+            <h2 className="text-2xl font-bold text-foreground">ألعاب الأحجية</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {puzzleGames.map((game, index) => (
@@ -205,13 +194,13 @@ export default function GamesPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
+          className="space-y-6"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-gradient-to-br from-green-500 to-emerald-500 p-2 rounded-lg">
-              <Grid3x3 className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+              <Grid3x3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h2 className="text-2xl font-bold">الكلمات المتقاطعة</h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-green-500/50 to-transparent"></div>
+            <h2 className="text-2xl font-bold text-foreground">الكلمات المتقاطعة</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {crosswordGames.map((game, index) => (
