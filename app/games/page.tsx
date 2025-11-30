@@ -24,10 +24,17 @@ export default function GamesPage() {
 
   const fetchGames = async () => {
     try {
-      const response = await apiClient.get<{ success: boolean; data: Game[] }>('/api/games')
-      setGames(response.data || [])
+      const response = await apiClient.get<{ success: boolean; count: number; data: Game[] }>('/api/games')
+      if (response.success && Array.isArray(response.data)) {
+        setGames(response.data)
+      }
     } catch (error) {
-      console.error(error)
+      console.error('Error fetching games:', error)
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في تحميل الألعاب',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }
@@ -148,64 +155,78 @@ export default function GamesPage() {
   }
 
   return (
-    <div className="w-full min-h-screen space-y-8 pb-8">
-
-
-      {puzzleGames.length > 0 && (
+    <div className="w-full min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="pt-6"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <Puzzle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            ألعاب تعليمية ممتعة
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            اختبر معلوماتك وتعلم بطريقة تفاعلية وحقق نقاطاً
+          </p>
+        </motion.div>
+
+        {puzzleGames.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Puzzle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">ألعاب الأحجية</h2>
             </div>
-            <h2 className="text-2xl font-bold text-foreground">ألعاب الأحجية</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {puzzleGames.map((game, index) => (
-              <GameCard key={game.id} game={game} index={index} />
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {crosswordGames.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-6"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-              <Grid3x3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {puzzleGames.map((game, index) => (
+                <GameCard key={game.id} game={game} index={index} />
+              ))}
             </div>
-            <h2 className="text-2xl font-bold text-foreground">الكلمات المتقاطعة</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {crosswordGames.map((game, index) => (
-              <GameCard key={game.id} game={game} index={index} />
-            ))}
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
 
-      {games.length === 0 && !loading && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center min-h-[300px] gap-4"
-        >
-          <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-full">
-            <Puzzle className="h-12 w-12 text-white" />
-          </div>
-          <h3 className="text-xl font-bold">لا توجد ألعاب متاحة حالياً</h3>
-          <p className="text-muted-foreground">تحقق مرة أخرى لاحقاً</p>
-        </motion.div>
-      )}
+        {crosswordGames.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                <Grid3x3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">الكلمات المتقاطعة</h2>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {crosswordGames.map((game, index) => (
+                <GameCard key={game.id} game={game} index={index} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {games.length === 0 && !loading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center min-h-[300px] gap-4"
+          >
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-full">
+              <Puzzle className="h-12 w-12 text-white" />
+            </div>
+            <h3 className="text-xl font-bold">لا توجد ألعاب متاحة حالياً</h3>
+            <p className="text-muted-foreground">تحقق مرة أخرى لاحقاً</p>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }

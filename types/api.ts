@@ -213,8 +213,22 @@ export interface CrosswordWord {
   }
 }
 
+export interface CrosswordClue {
+  clue: string
+  answer: string
+  position: {
+    row: number
+    col: number
+  }
+}
+
 export interface CrosswordData {
-  words: CrosswordWord[]
+  words?: CrosswordWord[]
+  grid?: string[][]
+  clues?: {
+    across?: string[]
+    down?: string[]
+  }
 }
 
 export interface Game {

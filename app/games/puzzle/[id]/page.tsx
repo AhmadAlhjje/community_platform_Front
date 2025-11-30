@@ -39,6 +39,16 @@ export default function PuzzlePage() {
     try {
       const response = await apiClient.get<{ success: boolean; data: Game }>(`/api/games/${params.id}`)
 
+      if (!response.success || !response.data) {
+        toast({
+          title: 'خطأ',
+          description: 'لم يتم العثور على اللعبة',
+          variant: 'destructive',
+        })
+        router.push('/games')
+        return
+      }
+
       // Check if game is already completed
       if (response.data.isCompleted) {
         toast({
@@ -52,15 +62,49 @@ export default function PuzzlePage() {
 
       setGame(response.data)
 
-      // Parse the content JSON
-      const content = JSON.parse(response.data.content)
+      // Parse the content - it comes as a JSON string that might be double-encoded
+      let content: PuzzleData | null = null
+      try {
+        // First parse attempt
+        let parsed = JSON.parse(response.data.content)
+
+        // If it's a string (double-encoded), parse again
+        if (typeof parsed === 'string') {
+          parsed = JSON.parse(parsed)
+        }
+
+        content = parsed
+      } catch (parseError) {
+        console.error('Error parsing content:', parseError)
+        toast({
+          title: 'خطأ',
+          description: 'حدث خطأ في تحميل بيانات اللعبة',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (!content || typeof content.pieces !== 'number') {
+        toast({
+          title: 'خطأ',
+          description: 'بيانات اللعبة غير صحيحة',
+          variant: 'destructive',
+        })
+        return
+      }
+
       setPuzzleData(content)
 
       // Initialize puzzle tiles
       const gridSize = content.pieces || 9
       initializePuzzle(gridSize)
     } catch (error) {
-      console.error(error)
+      console.error('Error fetching game:', error)
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في تحميل اللعبة',
+        variant: 'destructive',
+      })
     }
   }
 

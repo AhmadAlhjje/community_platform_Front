@@ -34,6 +34,16 @@ export default function CrosswordPage() {
     try {
       const response = await apiClient.get<{ success: boolean; data: Game }>(`/api/games/${params.id}`)
 
+      if (!response.success || !response.data) {
+        toast({
+          title: 'خطأ',
+          description: 'لم يتم العثور على اللعبة',
+          variant: 'destructive',
+        })
+        router.push('/games')
+        return
+      }
+
       // Check if game is already completed
       if (response.data.isCompleted) {
         toast({
@@ -47,15 +57,136 @@ export default function CrosswordPage() {
 
       setGame(response.data)
 
-      const content: CrosswordData = JSON.parse(response.data.content)
-      setCrosswordData(content)
+      // Parse the content - it comes as a JSON string that might be double-encoded
+      let content: CrosswordData | null = null
+      try {
+        // First parse attempt
+        let parsed = JSON.parse(response.data.content)
+
+        // If it's a string (double-encoded), parse again
+        if (typeof parsed === 'string') {
+          parsed = JSON.parse(parsed)
+        }
+
+        content = parsed
+      } catch (parseError) {
+        console.error('Error parsing content:', parseError)
+        toast({
+          title: 'خطأ',
+          description: 'حدث خطأ في تحميل بيانات اللعبة',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (!content) {
+        toast({
+          title: 'خطأ',
+          description: 'بيانات اللعبة غير صحيحة',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      // Handle both old and new API formats
+      let processedContent: CrosswordData = content
+
+      // If we have grid and clues (new format), convert to words format for compatibility
+      if (content.grid && content.clues && !content.words) {
+        const grid = content.grid
+        const clues = content.clues
+        // Build words array from grid and clues
+        const words: CrosswordWord[] = []
+        let wordNumber = 1
+
+        // Process across clues
+        if (clues.across) {
+          clues.across.forEach((clue) => {
+            // Find the position in grid
+            let found = false
+            for (let row = 0; row < grid.length && !found; row++) {
+              for (let col = 0; col < grid[row].length && !found; col++) {
+                if (grid[row][col] !== '') {
+                  // Calculate answer from grid
+                  let answer = ''
+                  for (let c = col; c < grid[row].length && grid[row][c] !== ''; c++) {
+                    answer += grid[row][c]
+                  }
+                  if (answer.length > 1) {
+                    words.push({
+                      number: wordNumber,
+                      direction: 'across',
+                      question: clue,
+                      answer: answer,
+                      position: { row, col }
+                    })
+                    found = true
+                    wordNumber++
+                  }
+                }
+              }
+            }
+          })
+        }
+
+        // Process down clues
+        if (clues.down) {
+          clues.down.forEach((clue) => {
+            // Find the position in grid
+            let found = false
+            for (let row = 0; row < grid.length && !found; row++) {
+              for (let col = 0; col < grid[row].length && !found; col++) {
+                if (grid[row][col] !== '') {
+                  // Calculate answer from grid
+                  let answer = ''
+                  for (let r = row; r < grid.length && grid[r][col] !== ''; r++) {
+                    answer += grid[r][col]
+                  }
+                  if (answer.length > 1) {
+                    const existsAcross = words.some(w => w.position.row === row && w.position.col === col)
+                    if (!existsAcross) {
+                      words.push({
+                        number: wordNumber,
+                        direction: 'down',
+                        question: clue,
+                        answer: answer,
+                        position: { row, col }
+                      })
+                      wordNumber++
+                      found = true
+                    }
+                  }
+                }
+              }
+            }
+          })
+        }
+
+        processedContent = { words }
+      }
+
+      if (!processedContent.words || !Array.isArray(processedContent.words)) {
+        toast({
+          title: 'خطأ',
+          description: 'بيانات اللعبة غير صحيحة',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      setCrosswordData(processedContent)
 
       // Build grid from words
-      const builtGrid = buildGrid(content.words)
+      const builtGrid = buildGrid(processedContent.words)
       setGrid(builtGrid)
       setUserGrid(builtGrid.map(row => row.map(cell => cell === '#' ? '#' : '')))
     } catch (error) {
-      console.error(error)
+      console.error('Error fetching game:', error)
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ في تحميل اللعبة',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -97,7 +228,7 @@ export default function CrosswordPage() {
   }
 
   const getWordNumberForCell = (row: number, col: number): number | null => {
-    if (!crosswordData) return null
+    if (!crosswordData || !crosswordData.words) return null
 
     // Find if this cell is the start of any word
     const word = crosswordData.words.find(w =>
@@ -430,10 +561,10 @@ export default function CrosswordPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {crosswordData.words
-                  .filter(word => word.direction === 'across')
-                  .sort((a, b) => a.number - b.number)
-                  .map((word, index) => (
+                {crosswordData?.words
+                  ?.filter(word => word.direction === 'across')
+                  ?.sort((a, b) => a.number - b.number)
+                  ?.map((word, index) => (
                     <motion.div
                       key={word.number}
                       initial={{ opacity: 0, x: -20 }}
@@ -463,10 +594,10 @@ export default function CrosswordPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {crosswordData.words
-                  .filter(word => word.direction === 'down')
-                  .sort((a, b) => a.number - b.number)
-                  .map((word, index) => (
+                {crosswordData?.words
+                  ?.filter(word => word.direction === 'down')
+                  ?.sort((a, b) => a.number - b.number)
+                  ?.map((word, index) => (
                     <motion.div
                       key={word.number}
                       initial={{ opacity: 0, x: -20 }}
