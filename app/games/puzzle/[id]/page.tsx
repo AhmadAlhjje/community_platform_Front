@@ -260,6 +260,7 @@ export default function PuzzlePage() {
   }
 
   const handlePieceClick = (pieceId: number) => {
+    if (placedPieces.some(p => p.pieceId === pieceId)) return
     playSound('click')
     setSelectedPiece(selectedPiece === pieceId ? null : pieceId)
   }
@@ -540,13 +541,13 @@ export default function PuzzlePage() {
         </motion.div>
 
         {/* Main Game Area */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-5 gap-6">
           {/* Puzzle Grid - Left/Top */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-2"
+            className="lg:col-span-3"
           >
             <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg">
               <CardHeader>
@@ -571,12 +572,13 @@ export default function PuzzlePage() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div
-                  className="grid gap-2 mx-auto mb-8"
+                  className="grid gap-2 sm:gap-3 mx-auto mb-6 sm:mb-8 p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border-2 border-purple-200 dark:border-purple-800"
                   style={{
                     gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-                    maxWidth: `${gridCols * 100}px`,
+                    maxWidth: '100%',
+                    width: 'min(100%, 480px)',
                     aspectRatio: '1 / 1',
                   }}
                 >
@@ -586,12 +588,21 @@ export default function PuzzlePage() {
                     return (
                       <motion.div
                         key={slotIndex}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: placedPiece ? 1 : 1.08 }}
+                        whileTap={{ scale: placedPiece ? 1 : 0.92 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: slotIndex * 0.02 }}
                       >
                         <button
                           onClick={() => handleSlotClick(slotIndex)}
-                          className="relative w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-purple-400 transition-colors overflow-hidden group"
+                          className={`relative w-full aspect-square rounded-xl border-3 transition-all overflow-hidden shadow-lg ${
+                            placedPiece
+                              ? 'bg-white dark:bg-gray-800 border-green-400 dark:border-green-600'
+                              : selectedPiece !== null
+                              ? 'bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 border-purple-400 dark:border-purple-600 border-dashed animate-pulse'
+                              : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 border-gray-300 dark:border-gray-600 border-dashed hover:border-purple-400 hover:from-purple-50 hover:to-pink-50'
+                          } group`}
                         >
                           {placedPiece ? (
                             <>
@@ -607,16 +618,37 @@ export default function PuzzlePage() {
                                   e.stopPropagation()
                                   handleUndo(slotIndex)
                                 }}
-                                className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold cursor-pointer"
+                                className="absolute inset-0 bg-gradient-to-br from-red-500/80 to-pink-500/80 flex flex-col items-center justify-center text-white font-bold cursor-pointer"
                               >
-                                إزالة
+                                <X className="h-6 w-6 mb-1" />
+                                <span className="text-xs">إزالة</span>
                               </motion.div>
                             </>
                           ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-2xl group-hover:text-purple-400">
-                              +
+                            <div className="flex items-center justify-center h-full">
+                              <motion.div
+                                animate={selectedPiece !== null ? {
+                                  scale: [1, 1.2, 1],
+                                  rotate: [0, 180, 360]
+                                } : {}}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "easeInOut"
+                                }}
+                                className={`text-4xl ${
+                                  selectedPiece !== null
+                                    ? 'text-purple-500 dark:text-purple-400'
+                                    : 'text-gray-300 dark:text-gray-600 group-hover:text-purple-400'
+                                }`}
+                              >
+                                +
+                              </motion.div>
                             </div>
                           )}
+                          <div className="absolute bottom-1 right-1 bg-white/80 dark:bg-gray-800/80 rounded-full px-2 py-0.5 text-[10px] font-bold text-gray-600 dark:text-gray-300">
+                            {slotIndex + 1}
+                          </div>
                         </button>
                       </motion.div>
                     )
@@ -685,13 +717,19 @@ export default function PuzzlePage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className="lg:col-span-2"
           >
-            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg sticky top-20">
-              <CardHeader>
-                <CardTitle className="text-lg">قطع اللغز</CardTitle>
+            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg lg:sticky lg:top-20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>قطع اللغز</span>
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {pieces.filter(p => !placedPieces.some(pp => pp.pieceId === p.id)).length} متبقية
+                  </span>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-2 max-h-[600px] overflow-y-auto">
+              <CardContent className="p-3 sm:p-6">
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-purple-300 dark:scrollbar-thumb-purple-700 scrollbar-track-transparent">
                   {pieces.map((piece) => {
                     const isPlaced = placedPieces.some(p => p.pieceId === piece.id)
                     const isSelected = selectedPiece === piece.id
@@ -699,16 +737,16 @@ export default function PuzzlePage() {
                     return (
                       <motion.button
                         key={piece.id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: isPlaced ? 1 : 1.05 }}
+                        whileTap={{ scale: isPlaced ? 1 : 0.95 }}
                         onClick={() => handlePieceClick(piece.id)}
                         disabled={isPlaced}
-                        className={`w-full h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all shadow-md ${
                           isSelected
-                            ? 'ring-2 ring-purple-500 border-purple-500'
+                            ? 'ring-4 ring-purple-500 ring-offset-2 border-purple-500 scale-105 shadow-xl'
                             : isPlaced
-                            ? 'opacity-30 cursor-not-allowed border-gray-300'
-                            : 'border-gray-300 hover:border-purple-400'
+                            ? 'opacity-30 cursor-not-allowed border-gray-300 grayscale'
+                            : 'border-gray-300 hover:border-purple-400 hover:shadow-lg'
                         }`}
                       >
                         <img
@@ -716,9 +754,20 @@ export default function PuzzlePage() {
                           alt={`piece ${piece.id}`}
                           className="w-full h-full object-cover"
                         />
+                        {isSelected && !isPlaced && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center"
+                          >
+                            <div className="bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              محدد
+                            </div>
+                          </motion.div>
+                        )}
                         {isPlaced && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-bold">
-                            مستخدم
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-bold">
+                            ✓ مستخدم
                           </div>
                         )}
                       </motion.button>

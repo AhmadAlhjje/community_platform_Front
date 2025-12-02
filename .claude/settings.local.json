@@ -15,7 +15,12 @@
       "Bash(npm run build:*)",
       "Bash(curl:*)",
       "Bash(\"(public)/about/page.tsx\")",
-      "Bash(\"(public)/contact/page.tsx\")"
+      "Bash(\"(public)/contact/page.tsx\")",
+      "Bash(pkill:*)",
+      "Bash(dir:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
