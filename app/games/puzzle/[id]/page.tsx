@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiClient } from '@/lib/api-client'
@@ -9,13 +9,26 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Trophy, Lightbulb, Award, Sparkles, RotateCcw, X } from 'lucide-react'
+import { ArrowLeft, Trophy, Lightbulb, RotateCcw, X, Volume2, VolumeX, Check } from 'lucide-react'
 import Link from 'next/link'
 
 interface PuzzleData {
   pieces: number
-  image?: string
+  imageUrl?: string
   difficulty: string
+  description?: string
+}
+
+interface PuzzlePiece {
+  id: number
+  correctX: number
+  correctY: number
+  image: string
+}
+
+interface PlacedPiece {
+  pieceId: number
+  slotId: number
 }
 
 export default function PuzzlePage() {
@@ -23,17 +36,59 @@ export default function PuzzlePage() {
   const router = useRouter()
   const [game, setGame] = useState<Game | null>(null)
   const [puzzleData, setPuzzleData] = useState<PuzzleData | null>(null)
-  const [tiles, setTiles] = useState<number[]>([])
+  const [pieces, setPieces] = useState<PuzzlePiece[]>([])
+  const [slots, setSlots] = useState<number[]>([]) // سيحتوي على معرفات القطع المعروضة
+  const [placedPieces, setPlacedPieces] = useState<PlacedPiece[]>([])
+  const [selectedPiece, setSelectedPiece] = useState<number | null>(null)
   const [moves, setMoves] = useState(0)
-  const [completed, setCompleted] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [checking, setChecking] = useState(false)
   const [startTime] = useState(Date.now())
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [gridCols, setGridCols] = useState(3)
   const { t } = useTranslation()
   const { toast } = useToast()
 
   useEffect(() => {
     fetchGame()
   }, [params.id])
+
+  useEffect(() => {
+    if (puzzleData && pieces.length === 0) {
+      generatePuzzlePieces()
+    }
+  }, [puzzleData?.imageUrl])
+
+  const playSound = (type: 'click' | 'success' | 'error') => {
+    if (!soundEnabled) return
+
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const oscillator = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    oscillator.connect(gain)
+    gain.connect(audioContext.destination)
+
+    if (type === 'click') {
+      oscillator.frequency.value = 600
+      gain.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.1)
+    } else if (type === 'error') {
+      oscillator.frequency.value = 300
+      gain.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.3)
+    } else if (type === 'success') {
+      oscillator.frequency.value = 1000
+      gain.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.5)
+    }
+  }
 
   const fetchGame = async () => {
     try {
@@ -49,7 +104,6 @@ export default function PuzzlePage() {
         return
       }
 
-      // Check if game is already completed
       if (response.data.isCompleted) {
         toast({
           title: 'تم إكمال هذه اللعبة مسبقاً',
@@ -62,17 +116,12 @@ export default function PuzzlePage() {
 
       setGame(response.data)
 
-      // Parse the content - it comes as a JSON string that might be double-encoded
       let content: PuzzleData | null = null
       try {
-        // First parse attempt
         let parsed = JSON.parse(response.data.content)
-
-        // If it's a string (double-encoded), parse again
         if (typeof parsed === 'string') {
           parsed = JSON.parse(parsed)
         }
-
         content = parsed
       } catch (parseError) {
         console.error('Error parsing content:', parseError)
@@ -84,7 +133,7 @@ export default function PuzzlePage() {
         return
       }
 
-      if (!content || typeof content.pieces !== 'number') {
+      if (!content || typeof content.pieces !== 'number' || !content.imageUrl) {
         toast({
           title: 'خطأ',
           description: 'بيانات اللعبة غير صحيحة',
@@ -93,11 +142,20 @@ export default function PuzzlePage() {
         return
       }
 
-      setPuzzleData(content)
+      let imageUrl = content.imageUrl
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'
+        imageUrl = apiBaseUrl + imageUrl
+      }
 
-      // Initialize puzzle tiles
-      const gridSize = content.pieces || 9
-      initializePuzzle(gridSize)
+      setPuzzleData({ ...content, imageUrl })
+
+      // حساب عدد الأعمدة بناءً على عدد القطع
+      const cols = Math.ceil(Math.sqrt(content.pieces))
+      setGridCols(cols)
+
+      // إنشاء فتحات فارغة
+      setSlots(Array(content.pieces).fill(null))
     } catch (error) {
       console.error('Error fetching game:', error)
       toast({
@@ -108,87 +166,189 @@ export default function PuzzlePage() {
     }
   }
 
-  const initializePuzzle = (pieces: number) => {
-    // Create array of tiles (0 represents empty space)
-    const tileArray = Array.from({ length: pieces }, (_, i) => i)
-    // Shuffle the tiles
-    const shuffled = shuffleArray(tileArray)
-    setTiles(shuffled)
-  }
-
-  const shuffleArray = (array: number[]) => {
-    const newArray = [...array]
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+  const generatePuzzlePieces = async () => {
+    if (!puzzleData?.imageUrl) {
+      console.error('No image URL available')
+      return
     }
-    return newArray
+
+    return new Promise<void>((resolve) => {
+      try {
+        const img = new window.Image()
+        img.crossOrigin = 'anonymous'
+        img.referrerPolicy = 'no-referrer'
+
+        img.onload = () => {
+          try {
+            const cols = Math.ceil(Math.sqrt(puzzleData.pieces))
+            const rows = Math.ceil(puzzleData.pieces / cols)
+            const pieceWidth = img.width / cols
+            const pieceHeight = img.height / rows
+
+            const newPieces: PuzzlePiece[] = []
+            let pieceId = 0
+
+            for (let row = 0; row < rows; row++) {
+              for (let col = 0; col < cols; col++) {
+                if (pieceId >= puzzleData.pieces) break
+
+                const pieceCanvas = document.createElement('canvas')
+                pieceCanvas.width = Math.floor(pieceWidth)
+                pieceCanvas.height = Math.floor(pieceHeight)
+
+                const pieceCtx = pieceCanvas.getContext('2d')
+                if (!pieceCtx) continue
+
+                pieceCtx.drawImage(
+                  img,
+                  Math.floor(col * pieceWidth),
+                  Math.floor(row * pieceHeight),
+                  Math.floor(pieceWidth),
+                  Math.floor(pieceHeight),
+                  0,
+                  0,
+                  Math.floor(pieceWidth),
+                  Math.floor(pieceHeight)
+                )
+
+                newPieces.push({
+                  id: pieceId,
+                  correctX: col,
+                  correctY: row,
+                  image: pieceCanvas.toDataURL('image/png'),
+                })
+
+                pieceId++
+              }
+            }
+
+            // تعشيش القطع
+            const shuffled = newPieces.sort(() => Math.random() - 0.5)
+            setPieces(shuffled)
+            console.log(`Generated ${shuffled.length} puzzle pieces`)
+            resolve()
+          } catch (error) {
+            console.error('Error creating puzzle pieces:', error)
+            toast({
+              title: 'خطأ',
+              description: 'فشل في تقطيع الصورة',
+              variant: 'destructive',
+            })
+            resolve()
+          }
+        }
+
+        img.onerror = () => {
+          console.error('Image load error, URL:', puzzleData.imageUrl)
+          toast({
+            title: 'خطأ في تحميل الصورة',
+            description: 'فشل تحميل الصورة',
+            variant: 'destructive',
+          })
+          resolve()
+        }
+
+        console.log('Loading image from:', puzzleData.imageUrl)
+        if (puzzleData.imageUrl) {
+          img.src = puzzleData.imageUrl
+        }
+      } catch (error) {
+        console.error('Error in generatePuzzlePieces:', error)
+        resolve()
+      }
+    })
   }
 
-  const getGridSize = () => {
-    if (!puzzleData) return 3
-    return Math.sqrt(puzzleData.pieces)
+  const handlePieceClick = (pieceId: number) => {
+    playSound('click')
+    setSelectedPiece(selectedPiece === pieceId ? null : pieceId)
   }
 
-  const canMove = (index: number) => {
-    const gridSize = getGridSize()
-    const emptyIndex = tiles.indexOf(0)
-    const row = Math.floor(index / gridSize)
-    const col = index % gridSize
-    const emptyRow = Math.floor(emptyIndex / gridSize)
-    const emptyCol = emptyIndex % gridSize
+  const handleSlotClick = (slotIndex: number) => {
+    if (selectedPiece === null) {
+      toast({
+        title: 'اختر قطعة أولاً',
+        description: 'يجب أن تختار قطعة من أسفل قبل النقر على مكان',
+        variant: 'destructive',
+      })
+      return
+    }
 
-    // Check if tile is adjacent to empty space
-    return (
-      (row === emptyRow && Math.abs(col - emptyCol) === 1) ||
-      (col === emptyCol && Math.abs(row - emptyRow) === 1)
-    )
-  }
+    // تحقق من أن هذا المكان فارغ
+    if (placedPieces.some(p => p.slotId === slotIndex)) {
+      toast({
+        title: 'هذا المكان مشغول',
+        description: 'اختر مكاناً فارغاً',
+        variant: 'destructive',
+      })
+      return
+    }
 
-  const moveTile = (index: number) => {
-    if (!canMove(index) || completed) return
-
-    const newTiles = [...tiles]
-    const emptyIndex = tiles.indexOf(0)
-    ;[newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]]
-
-    setTiles(newTiles)
+    playSound('click')
+    setPlacedPieces([...placedPieces, { pieceId: selectedPiece, slotId: slotIndex }])
+    setSelectedPiece(null)
     setMoves(moves + 1)
-
-    // Check if puzzle is solved
-    const isSolved = newTiles.every((tile, i) => tile === i)
-    if (isSolved) {
-      handleComplete()
-    }
   }
 
-  const resetPuzzle = () => {
-    if (puzzleData) {
-      initializePuzzle(puzzleData.pieces)
-      setMoves(0)
-    }
+  const handleUndo = (slotIndex: number) => {
+    setPlacedPieces(placedPieces.filter(p => p.slotId !== slotIndex))
+    setMoves(Math.max(0, moves - 1))
   }
 
-  const handleComplete = async () => {
-    if (!game) return
+  const checkSolution = async () => {
+    if (placedPieces.length !== puzzleData?.pieces) {
+      toast({
+        title: 'لم تكمل اللعبة',
+        description: `أكمل جميع القطع (${placedPieces.length}/${puzzleData?.pieces})`,
+        variant: 'destructive',
+      })
+      playSound('error')
+      return
+    }
 
+    setChecking(true)
+
+    // التحقق من صحة الحل
+    let isCorrect = true
+    for (const placed of placedPieces) {
+      const piece = pieces.find(p => p.id === placed.pieceId)
+      const expectedSlotId = piece!.correctY * gridCols + piece!.correctX
+
+      if (expectedSlotId !== placed.slotId) {
+        isCorrect = false
+        break
+      }
+    }
+
+    if (!isCorrect) {
+      playSound('error')
+      toast({
+        title: 'الحل غير صحيح',
+        description: 'بعض القطع في أماكن خاطئة. حاول مرة أخرى!',
+        variant: 'destructive',
+      })
+      setChecking(false)
+      return
+    }
+
+    // الحل صحيح!
+    playSound('success')
     const completionTime = Math.floor((Date.now() - startTime) / 1000)
 
     try {
       await apiClient.post(
-        `/api/games/${game.id}/complete`,
+        `/api/games/${game!.id}/complete`,
         {
           score: 100,
           completionTime,
         },
         true
       )
-      setCompleted(true)
-      setShowSuccess(true)
 
+      setShowSuccess(true)
       toast({
         title: 'مبروك!',
-        description: `لقد أكملت اللعبة في ${moves} حركة وربحت ${game.pointsReward} نقطة!`,
+        description: `لقد أكملت اللعبة في ${moves} حركة وربحت ${game!.pointsReward} نقطة!`,
         variant: 'success',
       })
     } catch (error: any) {
@@ -197,314 +357,399 @@ export default function PuzzlePage() {
         description: error.message,
         variant: 'destructive',
       })
+    } finally {
+      setChecking(false)
     }
   }
 
-  if (!game || !puzzleData) {
+  const resetGame = () => {
+    setPlacedPieces([])
+    setSelectedPiece(null)
+    setMoves(0)
+    setPieces([...pieces].sort(() => Math.random() - 0.5))
+  }
+
+  if (!game || !puzzleData || pieces.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
 
-  const gridSize = getGridSize()
-  const colors = [
-    'from-red-400 to-pink-500',
-    'from-orange-400 to-yellow-500',
-    'from-green-400 to-emerald-500',
-    'from-blue-400 to-cyan-500',
-    'from-purple-400 to-pink-500',
-    'from-indigo-400 to-purple-500',
-    'from-teal-400 to-green-500',
-    'from-rose-400 to-red-500',
-    'from-amber-400 to-orange-500',
-  ]
+  const getPlacedPieceAtSlot = (slotIndex: number) => {
+    const placed = placedPieces.find(p => p.slotId === slotIndex)
+    return placed ? pieces.find(p => p.id === placed.pieceId) : null
+  }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-8">
-      <Link href="/games">
-        <Button variant="ghost" size="sm">
-          <ArrowLeft className="h-4 w-4 ml-2" />
-          العودة للألعاب
-        </Button>
-      </Link>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 py-8">
+      <div className="max-w-6xl mx-auto px-4 space-y-6">
+        <Link href="/games">
+          <Button variant="ghost" size="sm" className="hover:bg-white/50">
+            <ArrowLeft className="h-4 w-4 ml-2" />
+            العودة للألعاب
+          </Button>
+        </Link>
 
-      {/* Success Animation */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          >
+        {/* Success Modal */}
+        <AnimatePresence>
+          {showSuccess && (
             <motion.div
-              initial={{ y: 50 }}
-              animate={{ y: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setShowSuccess(false)}
-                className="absolute top-4 left-4 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors"
-                aria-label="إغلاق"
+              <motion.div
+                initial={{ scale: 0.5, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.5, y: 50 }}
+                className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden relative"
               >
-                <X className="h-6 w-6 text-white" />
-              </button>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
 
-              {/* Header with gradient */}
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-8 text-center">
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 5, -5, 0],
-                  }}
-                  transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 1 }}
+                <button
+                  onClick={() => setShowSuccess(false)}
+                  className="absolute top-4 right-4 z-10 bg-white/30 hover:bg-white/50 backdrop-blur-sm rounded-full p-2 transition-colors"
+                  aria-label="إغلاق"
                 >
-                  <Trophy className="h-20 w-20 text-white mx-auto" />
-                </motion.div>
-                <h2 className="text-3xl font-bold text-white mt-4">
-                  رائع!
-                </h2>
-                <p className="text-xl text-white/90 mt-2">
-                  لقد أكملت اللعبة بنجاح
-                </p>
-                <div className="flex gap-4 justify-center mt-4">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2">
-                    <p className="text-lg font-bold text-white">
-                      {moves} حركة
-                    </p>
-                  </div>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2">
-                    <p className="text-lg font-bold text-white">
-                      +{game.pointsReward} نقطة
-                    </p>
-                  </div>
-                </div>
-              </div>
+                  <X className="h-6 w-6 text-gray-700 dark:text-white" />
+                </button>
 
-              {/* Educational Message */}
-              <div className="p-8">
-                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-full">
-                      <Lightbulb className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">
-                        💡 الرسالة التعليمية
-                      </h3>
-                      <p className="text-lg text-amber-800 dark:text-amber-200 leading-relaxed">
-                        {game.educationalMessage}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => router.push('/games')}
-                  className="w-full mt-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
-                  size="lg"
-                >
-                  العودة إلى الألعاب
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative"
-      >
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-20"></div>
-        <Card className="relative">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-2xl mb-2">{game.title}</CardTitle>
-                {!completed && (
-                  <p className="text-muted-foreground text-sm">
-                    أكمل اللعبة لمعرفة الرسالة التعليمية
-                  </p>
-                )}
-                {completed && (
-                  <p className="text-muted-foreground flex items-center gap-2 mt-2">
-                    <Lightbulb className="h-4 w-4 text-amber-500" />
-                    {game.educationalMessage}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-full">
-                <Award className="h-4 w-4" />
-                <span className="font-bold">{game.pointsReward} نقطة</span>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-      </motion.div>
-
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="flex justify-center gap-4"
-      >
-        <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl">
-          <div className="text-sm opacity-90">الحركات</div>
-          <div className="text-2xl font-bold">{moves}</div>
-        </div>
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white px-6 py-3 rounded-xl">
-          <div className="text-sm opacity-90">القطع</div>
-          <div className="text-2xl font-bold">{puzzleData.pieces}</div>
-        </div>
-      </motion.div>
-
-      {/* Puzzle Grid */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Card>
-          <CardContent className="p-6">
-            <div
-              className="grid gap-2 mx-auto"
-              style={{
-                gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                maxWidth: `${gridSize * 100}px`,
-              }}
-            >
-              {tiles.map((tile, index) => {
-                const isEmpty = tile === 0
-                const colorIndex = tile % colors.length
-
-                return (
-                  <motion.button
-                    key={index}
-                    onClick={() => moveTile(index)}
-                    disabled={isEmpty || completed}
-                    whileHover={!isEmpty && !completed ? { scale: 1.05 } : {}}
-                    whileTap={!isEmpty && !completed ? { scale: 0.95 } : {}}
-                    layout
-                    className={`
-                      aspect-square rounded-xl text-white font-bold text-2xl
-                      transition-all duration-200 relative overflow-hidden
-                      ${isEmpty ? 'bg-gray-200 dark:bg-gray-800 cursor-default' : 'cursor-pointer'}
-                      ${!isEmpty && canMove(index) && !completed ? 'ring-2 ring-purple-500 ring-offset-2' : ''}
-                    `}
+                <div className="relative z-10 p-8 text-center space-y-6">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.15, 1],
+                      rotate: [0, 8, -8, 0],
+                      y: [0, -10, 0],
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      repeat: Infinity,
+                      repeatDelay: 2,
+                    }}
                   >
-                    {!isEmpty && (
-                      <>
-                        <div className={`absolute inset-0 bg-gradient-to-br ${colors[colorIndex]}`} />
-                        <div className="relative z-10 h-full flex items-center justify-center">
-                          <span>{tile}</span>
-                        </div>
-                        {canMove(index) && !completed && (
-                          <motion.div
-                            animate={{ opacity: [0.3, 0.7, 0.3] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="absolute inset-0 bg-white/20"
-                          />
-                        )}
-                        {completed && (
-                          <div className="absolute inset-0 bg-green-500/50 flex items-center justify-center">
-                            <Sparkles className="h-8 w-8 text-white" />
+                    <div className="mx-auto w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Trophy className="h-14 w-14 text-white" />
+                    </div>
+                  </motion.div>
+
+                  <div>
+                    <motion.h2
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2"
+                    >
+                      رائع جداً!
+                    </motion.h2>
+                    <motion.p
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-gray-600 dark:text-gray-300 text-lg"
+                    >
+                      لقد حللت اللغز بنجاح
+                    </motion.p>
+                  </div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="grid grid-cols-2 gap-4"
+                  >
+                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">الحركات</div>
+                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{moves}</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">النقاط</div>
+                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">+{game.pointsReward}</div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-2xl p-4"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="bg-amber-100 dark:bg-amber-900/40 p-2 rounded-lg flex-shrink-0">
+                        <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1 uppercase">
+                          الرسالة التعليمية
+                        </p>
+                        <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
+                          {game.educationalMessage}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <Button
+                      onClick={() => router.push('/games')}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-lg font-semibold"
+                      size="lg"
+                    >
+                      العودة إلى الألعاب
+                    </Button>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg">
+            <CardHeader className="pb-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                    {game.title}
+                  </CardTitle>
+                  {puzzleData.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      {puzzleData.description}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-700 dark:text-yellow-300 px-4 py-2 rounded-xl font-bold whitespace-nowrap">
+                  <Trophy className="h-5 w-5" />
+                  <span>{game.pointsReward} نقطة</span>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        </motion.div>
+
+        {/* Main Game Area */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Puzzle Grid - Left/Top */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-2"
+          >
+            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>مربعات اللغز</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {placedPieces.length}/{puzzleData.pieces}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSoundEnabled(!soundEnabled)}
+                      className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                    >
+                      {soundEnabled ? (
+                        <Volume2 className="h-5 w-5" />
+                      ) : (
+                        <VolumeX className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div
+                  className="grid gap-2 mx-auto mb-8"
+                  style={{
+                    gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+                    maxWidth: `${gridCols * 100}px`,
+                    aspectRatio: '1 / 1',
+                  }}
+                >
+                  {slots.map((_, slotIndex) => {
+                    const placedPiece = getPlacedPieceAtSlot(slotIndex)
+
+                    return (
+                      <motion.div
+                        key={slotIndex}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <button
+                          onClick={() => handleSlotClick(slotIndex)}
+                          className="relative w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-purple-400 transition-colors overflow-hidden group"
+                        >
+                          {placedPiece ? (
+                            <>
+                              <img
+                                src={placedPiece.image}
+                                alt="puzzle piece"
+                                className="w-full h-full object-cover"
+                              />
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                whileHover={{ opacity: 1 }}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleUndo(slotIndex)
+                                }}
+                                className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold cursor-pointer"
+                              >
+                                إزالة
+                              </motion.div>
+                            </>
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500 text-2xl group-hover:text-purple-400">
+                              +
+                            </div>
+                          )}
+                        </button>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+
+                {/* Progress */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">التقدم</span>
+                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                      {placedPieces.length}/{puzzleData.pieces}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <motion.div
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${(placedPieces.length / puzzleData.pieces) * 100}%`,
+                      }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">الحركات</div>
+                    <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{moves}</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4 text-center">
+                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">الصعوبة</div>
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400 capitalize">
+                      {puzzleData.difficulty}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-6">
+                  <Button
+                    onClick={resetGame}
+                    variant="outline"
+                    className="flex-1 border-2"
+                  >
+                    <RotateCcw className="h-4 w-4 ml-2" />
+                    إعادة
+                  </Button>
+                  <Button
+                    onClick={checkSolution}
+                    disabled={placedPieces.length !== puzzleData.pieces || checking}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                  >
+                    <Check className="h-4 w-4 ml-2" />
+                    {checking ? 'جاري التحقق...' : 'تحقق من الحل'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Pieces Panel - Right/Bottom */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg sticky top-20">
+              <CardHeader>
+                <CardTitle className="text-lg">قطع اللغز</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                  {pieces.map((piece) => {
+                    const isPlaced = placedPieces.some(p => p.pieceId === piece.id)
+                    const isSelected = selectedPiece === piece.id
+
+                    return (
+                      <motion.button
+                        key={piece.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handlePieceClick(piece.id)}
+                        disabled={isPlaced}
+                        className={`w-full h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                          isSelected
+                            ? 'ring-2 ring-purple-500 border-purple-500'
+                            : isPlaced
+                            ? 'opacity-30 cursor-not-allowed border-gray-300'
+                            : 'border-gray-300 hover:border-purple-400'
+                        }`}
+                      >
+                        <img
+                          src={piece.image}
+                          alt={`piece ${piece.id}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {isPlaced && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-bold">
+                            مستخدم
                           </div>
                         )}
-                      </>
-                    )}
-                  </motion.button>
-                )
-              })}
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <Button
-                onClick={resetPuzzle}
-                variant="outline"
-                className="flex-1"
-                disabled={completed}
-              >
-                <RotateCcw className="h-4 w-4 ml-2" />
-                إعادة البدء
-              </Button>
-              {completed && (
-                <Button
-                  onClick={() => router.push('/games')}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500"
-                >
-                  <Trophy className="h-4 w-4 ml-2" />
-                  العودة للألعاب
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Completion Message */}
-      {completed && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <Card className="border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
-            <CardContent className="pt-6 text-center space-y-4">
-              <Trophy className="h-16 w-16 text-purple-600 mx-auto" />
-              <h3 className="text-2xl font-bold">تم إكمال اللعبة!</h3>
-              <p className="text-muted-foreground">
-                لقد أكملت اللعبة في {moves} حركة
-              </p>
-              <p className="text-lg font-bold text-purple-600">
-                +{game.pointsReward} نقطة
-              </p>
-
-              {/* Educational Message */}
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg mt-4">
-                <div className="flex items-start gap-3">
-                  <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
-                      الرسالة التعليمية
-                    </p>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
-                      {game.educationalMessage}
-                    </p>
-                  </div>
+                      </motion.button>
+                    )
+                  })}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
-      {/* Instructions */}
-      {!completed && (
+        {/* Instructions */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-6"
         >
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">كيفية اللعب</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>• انقر على القطع المجاورة للمربع الفارغ لتحريكها</p>
-              <p>• رتب الأرقام من 0 إلى {puzzleData.pieces - 1} بالترتيب</p>
-              <p>• القطع المحاطة بحلقة بنفسجية يمكن تحريكها</p>
-              <p>• أكمل الترتيب الصحيح لربح النقاط!</p>
-            </CardContent>
-          </Card>
+          <h4 className="font-bold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" />
+            كيفية اللعب
+          </h4>
+          <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+            <li>✓ اختر قطعة من الجانب الأيمن</li>
+            <li>✓ انقر على مكان فارغ في الشبكة اليسرى لوضعها</li>
+            <li>✓ استخدم زر "إزالة" لحذف قطعة من مكانها</li>
+            <li>✓ عندما تنتهي، انقر على "تحقق من الحل"</li>
+            <li>✓ إذا كانت جميع القطع في أماكنها الصحيحة ستفوز!</li>
+          </ul>
         </motion.div>
-      )}
+      </div>
     </div>
   )
 }
