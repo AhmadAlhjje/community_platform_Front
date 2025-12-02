@@ -92,9 +92,6 @@ export function PublicNavbar() {
                 >
                   <span className="text-primary-foreground font-bold text-sm">م</span>
                 </motion.div>
-                <span className="text-lg font-bold hidden sm:inline-block text-foreground group-hover:text-primary transition-colors">
-                  {t('common.appName')}
-                </span>
               </Link>
 
               {/* Desktop Navigation - Center */}

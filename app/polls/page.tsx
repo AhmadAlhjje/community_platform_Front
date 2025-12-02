@@ -4,14 +4,20 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { apiClient } from '@/lib/api-client'
 import {
-  Discussion,
-  DiscussionsResponse,
   PollVoteResponse
 } from '@/types/api'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Clock, Users, CheckCircle2, Video, Calendar, Award } from 'lucide-react'
+import { Clock, CheckCircle2, Video, Calendar, Award } from 'lucide-react'
+
+interface PollOption {
+  id: string
+  text: string
+  order: number
+  votesCount: number
+  percentage: number
+}
 
 interface Poll {
   id: string
@@ -25,6 +31,26 @@ interface Poll {
     id: string
     name: string
   }
+  options: PollOption[]
+  totalVotes: number
+  userVote?: string
+}
+
+interface Discussion {
+  id: string
+  title: string
+  description: string
+  meetLink: string | null
+  dateTime: string | null
+  pointsReward: number
+  adminId: string
+  createdAt: string
+  updatedAt: string
+  admin: {
+    id: string
+    name: string
+  }
+  attendances: any[]
 }
 
 interface PollsResponse {
@@ -32,6 +58,13 @@ interface PollsResponse {
   count: number
   data: Poll[]
 }
+
+interface DiscussionsResponse {
+  success: boolean
+  count: number
+  data: Discussion[]
+}
+
 
 export default function PollsPage() {
   const [latestPoll, setLatestPoll] = useState<Poll | null>(null)
@@ -106,6 +139,10 @@ export default function PollsPage() {
           setPollEnded(true)
           fetchLatestDiscussionAfterPoll()
         }
+      } else {
+        // No active polls, fetch discussions
+        setPollEnded(true)
+        fetchLatestDiscussionAfterPoll()
       }
     } catch (error) {
       console.error(error)
@@ -129,17 +166,10 @@ export default function PollsPage() {
           return new Date(current.createdAt) > new Date(prev.createdAt) ? current : prev
         })
 
-        // Check if discussion date is after poll end time
-        if (pollEndTime && latest.dateTime) {
-          const discussionDate = new Date(latest.dateTime).getTime()
-
-          if (discussionDate > pollEndTime) {
-            setLatestDiscussion(latest)
-            // Fetch meet link if available
-            if (latest.meetLink) {
-              setMeetLink(latest.meetLink)
-            }
-          }
+        setLatestDiscussion(latest)
+        // Fetch meet link if available
+        if (latest.meetLink) {
+          setMeetLink(latest.meetLink)
         }
       }
     } catch (error) {
@@ -154,11 +184,35 @@ export default function PollsPage() {
       setVoting(true)
       const response = await apiClient.post<PollVoteResponse>(
         `/api/polls/${latestPoll.id}/vote`,
-        { vote: selectedVote },
+        { optionId: selectedVote },
         true
       )
 
       if (response.success) {
+        // Update the poll with new vote data
+        const updatedPoll = {
+          ...latestPoll,
+          userVote: selectedVote,
+          totalVotes: latestPoll.totalVotes + 1,
+          options: latestPoll.options.map(option => {
+            if (option.id === selectedVote) {
+              const newVotesCount = option.votesCount + 1
+              const newPercentage = ((newVotesCount / (latestPoll.totalVotes + 1)) * 100)
+              return {
+                ...option,
+                votesCount: newVotesCount,
+                percentage: Math.round(newPercentage * 10) / 10
+              }
+            }
+            // Recalculate percentage for other options
+            const newPercentage = ((option.votesCount / (latestPoll.totalVotes + 1)) * 100)
+            return {
+              ...option,
+              percentage: Math.round(newPercentage * 10) / 10
+            }
+          })
+        }
+        setLatestPoll(updatedPoll)
         setHasVoted(true)
         toast({
           title: 'تم التصويت بنجاح!',
@@ -168,6 +222,9 @@ export default function PollsPage() {
       }
     } catch (error: any) {
       if (error.message && error.message.includes('صوّت')) {
+        // Poll already voted - update userVote
+        setLatestPoll(prev => prev ? { ...prev, userVote: selectedVote } : null)
+        setHasVoted(true)
         toast({
           title: 'لا يمكن التصويت مرتين',
           description: error.message,
@@ -193,27 +250,7 @@ export default function PollsPage() {
     )
   }
 
-  if (!latestPoll) {
-    return (
-      <div className="space-y-6 max-w-3xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold">الستبيان الوعي المجتمعي</h1>
-          <p className="text-muted-foreground">لا توجد استطلاعات نشطة حالياً</p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>بانتظار استطلاع جديد</CardTitle>
-            <CardDescription>
-              سيتم إشعارك عند توفر استطلاع جديد
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    )
-  }
-
-  // Show discussion if poll ended and discussion exists with date after poll
+  // Show discussion if poll ended and discussion exists
   if (pollEnded && latestDiscussion) {
     return (
       <div className="space-y-6 max-w-3xl mx-auto">
@@ -232,19 +269,17 @@ export default function PollsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-muted p-4 rounded-lg space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {new Date(latestDiscussion.dateTime).toLocaleString('ar-EG', {
-                    dateStyle: 'full',
-                    timeStyle: 'short',
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Award className="h-4 w-4" />
-                <span>{latestDiscussion.pointsReward} نقطة للحضور</span>
-              </div>
+              {latestDiscussion.dateTime && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    {new Date(latestDiscussion.dateTime).toLocaleString('ar-EG', {
+                      dateStyle: 'full',
+                      timeStyle: 'short',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
 
             {meetLink && (
@@ -302,73 +337,135 @@ export default function PollsPage() {
     )
   }
 
-  // Show poll voting (default state)
+  // Show poll voting (default state) if poll exists
+  if (latestPoll) {
+    return (
+      <div className="space-y-6 max-w-3xl mx-auto">
+        <div>
+          <h1 className="text-3xl font-bold">الستبيان الوعي المجتمعي</h1>
+          <p className="text-muted-foreground">شارك رأيك وساهم في بناء مجتمعنا</p>
+        </div>
+
+        <Card className="border-primary/50">
+          <CardHeader>
+            <CardTitle className="text-2xl">{latestPoll.title || 'استطلاع الرأي'}</CardTitle>
+            {latestPoll.description && (
+              <CardDescription className="text-base">{latestPoll.description}</CardDescription>
+            )}
+            <CardDescription className="flex items-center gap-2 mt-2">
+              <Clock className="h-4 w-4" />
+              الوقت المتبقي: {timeRemaining}
+            </CardDescription>
+            <CardDescription className="text-sm">
+              اكسب {latestPoll.pointsReward} نقطة بالتصويت
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              {latestPoll.options.map((option, index) => {
+                const isSelected = selectedVote === option.id
+                const isUserVote = latestPoll.userVote === option.id
+
+                return (
+                  <motion.div
+                    key={option.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div
+                      onClick={() => !hasVoted && setSelectedVote(option.id)}
+                      className={`relative overflow-hidden rounded-lg cursor-pointer transition-all duration-200 ${
+                        isSelected || isUserVote
+                          ? 'ring-2 ring-primary'
+                          : 'border border-input hover:border-primary/50'
+                      } ${hasVoted ? 'cursor-not-allowed' : ''}`}
+                    >
+                      {/* Background bar for percentage */}
+                      <div
+                        className="absolute inset-0 bg-primary/10 transition-all duration-300"
+                        style={{ width: `${option.percentage}%` }}
+                      />
+
+                      {/* Content */}
+                      <div className="relative p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {isUserVote && (
+                            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          )}
+                          {!isUserVote && (
+                            <div className={`w-5 h-5 rounded-full border-2 transition-colors ${
+                              isSelected ? 'border-primary bg-primary/20' : 'border-gray-300'
+                            }`} />
+                          )}
+                          <span className="text-right flex-1 text-base font-medium">{option.text}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-primary ml-4">
+                          {option.percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+
+              {!hasVoted && (
+                <Button
+                  className="w-full mt-4"
+                  size="lg"
+                  onClick={handleVote}
+                  disabled={!selectedVote || voting}
+                >
+                  {voting ? 'جاري التصويت...' : 'تأكيد التصويت'}
+                </Button>
+              )}
+
+              {hasVoted && (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg text-center">
+                  <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                    ✓ شكراً لتصويتك
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {hasVoted && (
+          <Card className="border-green-200 dark:border-green-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-6 w-6" />
+                شكراً لتصويتك!
+              </CardTitle>
+              <CardDescription>
+                سيتم الإعلان عن الجلسة الحوارية عند انتهاء وقت الاستطلاع
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  // Fallback if no poll and no discussion
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold">الستبيان الوعي المجتمعي</h1>
-        <p className="text-muted-foreground">شارك رأيك وساهم في بناء مجتمعنا</p>
+        <p className="text-muted-foreground">لا توجد استطلاعات نشطة حالياً</p>
       </div>
 
-      <Card className="border-primary/50">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{latestPoll.title || 'استطلاع الرأي'}</CardTitle>
-          {latestPoll.description && (
-            <CardDescription className="text-base">{latestPoll.description}</CardDescription>
-          )}
-          <CardDescription className="flex items-center gap-2 mt-2">
-            <Clock className="h-4 w-4" />
-            الوقت المتبقي: {timeRemaining}
-          </CardDescription>
-          <CardDescription className="text-sm">
-            اكسب {latestPoll.pointsReward} نقطة بالتصويت
+          <CardTitle>بانتظار استطلاع جديد</CardTitle>
+          <CardDescription>
+            سيتم إشعارك عند توفر استطلاع جديد
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-
-          <div className="space-y-3">
-            {['نعم', 'لا', 'محايد'].map((option, index) => (
-              <motion.div
-                key={option}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Button
-                  variant={selectedVote === option ? 'default' : 'outline'}
-                  className="w-full h-12 text-right"
-                  onClick={() => setSelectedVote(option)}
-                >
-                  {option}
-                </Button>
-              </motion.div>
-            ))}
-
-            <Button
-              className="w-full mt-4"
-              size="lg"
-              onClick={handleVote}
-              disabled={!selectedVote || voting}
-            >
-              {voting ? 'جاري التصويت...' : 'تأكيد التصويت'}
-            </Button>
-          </div>
-        </CardContent>
       </Card>
-
-      {hasVoted && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
-              شكراً لتصويتك!
-            </CardTitle>
-            <CardDescription>
-              سيتم الإعلان عن الجلسة الحوارية عند انتهاء وقت الاستطلاع
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
     </div>
   )
 }
