@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
-import { Game } from '@/types/api'
+import { Game, UserGameHistoryResponse } from '@/types/api'
 import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,19 +14,46 @@ import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy } from 'lucide-react
 export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
+  const [completedGameIds, setCompletedGameIds] = useState<Set<string>>(new Set())
   const { t } = useTranslation()
   const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchGames()
+    fetchGamesAndHistory()
   }, [])
 
-  const fetchGames = async () => {
+  const fetchGamesAndHistory = async () => {
     try {
-      const response = await apiClient.get<{ success: boolean; count: number; data: Game[] }>('/api/games')
-      if (response.success && Array.isArray(response.data)) {
-        setGames(response.data)
+      setLoading(true)
+
+      // Fetch both games and user history in parallel
+      const [gamesResponse, historyResponse] = await Promise.all([
+        apiClient.get<{ success: boolean; count: number; data: Game[] }>('/api/games'),
+        apiClient.get<UserGameHistoryResponse>('/api/games/user/history', true).catch(() => null)
+      ])
+
+      // Process games
+      if (gamesResponse.success && Array.isArray(gamesResponse.data)) {
+        // Get completed game IDs from history
+        const completedIds = new Set<string>()
+        if (historyResponse?.success && historyResponse.data) {
+          historyResponse.data.forEach(history => {
+            if (history.completed) {
+              completedIds.add(history.gameId)
+            }
+          })
+        }
+
+        setCompletedGameIds(completedIds)
+
+        // Mark games as completed based on history
+        const gamesWithCompletionStatus = gamesResponse.data.map(game => ({
+          ...game,
+          isCompleted: completedIds.has(game.id)
+        }))
+
+        setGames(gamesWithCompletionStatus)
       }
     } catch (error) {
       console.error('Error fetching games:', error)
@@ -40,8 +67,9 @@ export default function GamesPage() {
     }
   }
 
-  const puzzleGames = games.filter((g) => g.type === 'puzzle')
-  const crosswordGames = games.filter((g) => g.type === 'crossword')
+  const puzzleGames = games.filter((g) => g.type === 'puzzle' && !g.isCompleted)
+  const crosswordGames = games.filter((g) => g.type === 'crossword' && !g.isCompleted)
+  const completedGames = games.filter((g) => g.isCompleted)
 
   const handlePlayGame = (game: Game) => {
     if (game.isCompleted) {
@@ -207,6 +235,27 @@ export default function GamesPage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {crosswordGames.map((game, index) => (
+                <GameCard key={game.id} game={game} index={index} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {completedGames.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">الألعاب المكتملة</h2>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {completedGames.map((game, index) => (
                 <GameCard key={game.id} game={game} index={index} />
               ))}
             </div>
