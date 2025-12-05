@@ -66,24 +66,8 @@ export default function LoginPage() {
                 <h2 className="text-2xl font-bold text-foreground">أهلاً بعودتك!</h2>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                تسجيل الدخول سهل وآمن. ابدأ رحلتك التعليمية معنا الآن
+                تسجيل الدخول سهل وآمن. ابدأ رحلتك التوعوية معنا الآن
               </p>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                { icon: '📚', title: 'تعلم بسهولة', desc: 'محتوى تعليمي متنوع وممتع' },
-                { icon: '🎮', title: 'العب وتعلم', desc: 'ألعاب تفاعلية وتحديات ممتعة' },
-                { icon: '🏆', title: 'احصل على نقاط', desc: 'جمع نقاط والتنافس مع الآخرين' },
-              ].map((item, index) => (
-                <div key={index} className="flex gap-3">
-                  <span className="text-2xl">{item.icon}</span>
-                  <div>
-                    <p className="font-semibold text-foreground">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </motion.div>
 

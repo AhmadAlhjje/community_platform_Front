@@ -47,12 +47,12 @@ export default function Home() {
     {
       icon: BookOpen,
       title: t('articles.title'),
-      description: 'اقرأ مقالات تعليمية مفيدة واختبر معلوماتك من خلال الأسئلة التفاعلية',
+      description: 'اقرأ مقالات توعوية واختبر معلوماتك من خلال الأسئلة التفاعلية',
     },
     {
       icon: Gamepad2,
       title: t('games.title'),
-      description: 'العب ألعاب تعليمية ممتعة وتعلم بطريقة تفاعلية وحقق نقاطاً',
+      description: 'العب ألعاب توعوية ممتعة وتعلم بطريقة تفاعلية وحقق نقاطاً',
     },
     {
       icon: MessageSquare,
@@ -81,20 +81,16 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="max-w-2xl"
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">منصة تعليمية متقدمة</span>
-            </div>
 
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
               <span className="text-foreground">منصة </span>
               <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-                تعزيز الوعي المجتمعي
+               صوتنا يبني
               </span>
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              تعلم بطريقة تفاعلية وممتعة من خلال المقالات والألعاب التعليمية والاستبيانات المجتمعية. احصل على نقاط وتنافس مع المستخدمين الآخرين.
+              شارك بطريقة تفاعلية وممتعة من خلال المقالات والألعاب التعليمية والاستبيانات المجتمعية. احصل على نقاط وتنافس مع المستخدمين الآخرين.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -126,7 +122,7 @@ export default function Home() {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">المميزات الرئيسية</h2>
             <p className="text-lg text-muted-foreground">
-              منصة شاملة توفر لك جميع الأدوات التي تحتاجها للتعلم والتطور
+              منصة شاملة توفر لك وعي بطريقة مبتكرة
             </p>
           </motion.div>
 
@@ -134,44 +130,6 @@ export default function Home() {
             {features.map((feature, index) => (
               <FeatureCard key={index} {...feature} delay={index * 0.1} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 md:py-24 border-t bg-card/50">
-        <div className="container px-4">
-          <div className="grid gap-8 md:grid-cols-3 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">100+</div>
-              <p className="text-muted-foreground">مقالة تعليمية</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">50+</div>
-              <p className="text-muted-foreground">لعبة تفاعلية</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">1000+</div>
-              <p className="text-muted-foreground">مستخدم نشط</p>
-            </motion.div>
           </div>
         </div>
       </section>
@@ -185,9 +143,9 @@ export default function Home() {
             viewport={{ once: true }}
             className="max-w-2xl mx-auto text-center space-y-6"
           >
-            <h2 className="text-3xl md:text-4xl font-bold">ابدأ رحلة التعلم الآن</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">ابدأ رحلة الوعي الآن</h2>
             <p className="text-lg text-muted-foreground">
-              انضم إلى آلاف المستخدمين الذين يتعلمون ويتطورون على منصتنا
+              انضم إلى المستخدمين الذين يتعلمون ويتطورون على منصتنا
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth/register">
@@ -209,7 +167,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-card/50 py-8">
         <div className="container px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 منصة تعزيز الوعي المجتمعي. جميع الحقوق محفوظة.</p>
+          <p>© 2024 منصة صوتنا يبني. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
     </div>

@@ -168,147 +168,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Form & Map */}
-      <section className="py-16 md:py-24 border-t bg-card/50">
-        <div className="container px-4">
-          <div className="grid gap-12 lg:grid-cols-2">
-            {/* Form */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="space-y-6"
-            >
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
-                  أرسل لنا رسالة
-                </h2>
-                <p className="text-muted-foreground">
-                  سيتم الرد على رسالتك في أسرع وقت ممكن
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    الاسم
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="أدخل اسمك"
-                    className="w-full px-4 py-2 bg-background border rounded-lg focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="أدخل بريدك الإلكتروني"
-                    className="w-full px-4 py-2 bg-background border rounded-lg focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    الموضوع
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    placeholder="ما الموضوع؟"
-                    className="w-full px-4 py-2 bg-background border rounded-lg focus:outline-none focus:border-primary transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    الرسالة
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="اكتب رسالتك هنا..."
-                    rows={5}
-                    className="w-full px-4 py-2 bg-background border rounded-lg focus:outline-none focus:border-primary transition-colors resize-none"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full"
-                >
-                  {loading ? 'جاري الإرسال...' : 'إرسال الرسالة'}
-                  {!loading && <Send className="h-4 w-4 ml-2" />}
-                </Button>
-              </form>
-            </motion.div>
-
-            {/* Additional Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="space-y-8"
-            >
-              <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl p-8 space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold mb-2 text-foreground">
-                    لماذا تتواصل معنا؟
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <MessageCircle className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">ملاحظات وتعليقات</h4>
-                      <p className="text-sm text-muted-foreground">شارك آراءك حول المنصة</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">الدعم الفني</h4>
-                      <p className="text-sm text-muted-foreground">احصل على مساعدة فنية</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <ArrowRight className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">فرص التعاون</h4>
-                      <p className="text-sm text-muted-foreground">استكشف فرص العمل معنا</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card border rounded-xl p-8">
-                <h3 className="text-xl font-bold mb-4 text-foreground">معلومة سريعة</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  فريقنا مخصص لخدمتك وحل مشاكلك. لا تتردد في التواصل معنا في أي وقت،
-                  وسنحرص على الرد عليك في أسرع وقت ممكن.
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section className="py-16 md:py-24">
         <div className="container px-4 space-y-12">
@@ -335,7 +194,7 @@ export default function ContactPage() {
               },
               {
                 q: 'كيف يمكنني الإبلاغ عن مشكلة أو خطأ؟',
-                a: 'يمكنك التواصل معنا مباشرة من خلال هذا النموذج أو البريد الإلكتروني'
+                a: 'يمكنك التواصل معنا مباشرة من خلال البريد الإلكتروني او رقم الهاتف'
               },
             ].map((faq, index) => (
               <motion.div
@@ -356,32 +215,10 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 border-t">
-        <div className="container px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl mx-auto text-center space-y-6"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">شكراً لاهتمامك</h2>
-            <p className="text-lg text-muted-foreground">
-              نتطلع لسماع رأيك وملاحظاتك
-            </p>
-            <Link href="/">
-              <Button size="lg" variant="outline">
-                العودة للصفحة الرئيسية
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t bg-card/50 py-8">
         <div className="container px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 منصة تعزيز الوعي المجتمعي. جميع الحقوق محفوظة.</p>
+          <p>© 2024 منصة صوتنا يبني. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
     </div>

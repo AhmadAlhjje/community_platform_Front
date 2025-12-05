@@ -1,20 +1,12 @@
-'use client'
+"use client";
 
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { useTranslation } from '@/hooks/use-translation'
-import { useAuth } from '@/hooks/use-auth'
-import { Button } from '@/components/ui/button'
-import { PublicNavbar } from '@/components/public-navbar'
-import {
-  Users,
-  Target,
-  Lightbulb,
-  Heart,
-  Zap,
-  ArrowRight,
-
-} from 'lucide-react'
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useTranslation } from "@/hooks/use-translation";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { PublicNavbar } from "@/components/public-navbar";
+import { Users, Target, Lightbulb, Heart, Zap, ArrowRight } from "lucide-react";
 
 const TeamMember = ({ name, role, description, delay }: any) => (
   <motion.div
@@ -33,11 +25,13 @@ const TeamMember = ({ name, role, description, delay }: any) => (
         </div>
         <h3 className="text-lg font-semibold text-foreground">{name}</h3>
         <p className="text-sm text-primary font-medium">{role}</p>
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {description}
+        </p>
       </div>
     </div>
   </motion.div>
-)
+);
 
 const ValueCard = ({ icon: Icon, title, description, delay }: any) => (
   <motion.div
@@ -55,60 +49,64 @@ const ValueCard = ({ icon: Icon, title, description, delay }: any) => (
           <Icon className="h-6 w-6 text-primary" />
         </div>
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {description}
+        </p>
       </div>
     </div>
   </motion.div>
-)
+);
 
 export default function AboutPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   const values = [
     {
       icon: Target,
-      title: 'رؤيتنا',
-      description: 'بناء مجتمع متعلم ومتطور من خلال التكنولوجيا والتعليم التفاعلي'
+      title: "رؤيتنا",
+      description:
+        "بناء مجتمع واعي ومتطور من خلال التكنولوجيا والتعليم التفاعلي",
     },
     {
       icon: Lightbulb,
-      title: 'الابتكار',
-      description: 'نستخدم أحدث التقنيات لإنشاء تجارب تعليمية فريدة وممتعة'
+      title: "الابتكار",
+      description: "نستخدم أحدث التقنيات لإنشاء تجارب تعليمية فريدة وممتعة",
     },
     {
       icon: Heart,
-      title: 'الشغف',
-      description: 'نؤمن بقوة التعليم والتطور الشخصي والمجتمعي'
+      title: "الشغف",
+      description: "نؤمن بقوة التعليم والتطور الشخصي والمجتمعي",
     },
     {
       icon: Zap,
-      title: 'الجودة',
-      description: 'نسعى لتقديم أفضل جودة في المحتوى والخدمات'
+      title: "الجودة",
+      description: "نسعى لتقديم أفضل جودة في المحتوى والخدمات",
     },
-  ]
+  ];
 
   const team = [
     {
-      name: 'فريق التطوير',
-      role: 'Backend & Frontend',
-      description: 'متخصصون في بناء تطبيقات ويب قوية وموثوقة باستخدام أحدث التقنيات'
+      name: "فريق التطوير",
+      role: "Backend & Frontend",
+      description:
+        "متخصصون في بناء تطبيقات ويب قوية وموثوقة باستخدام أحدث التقنيات",
     },
     {
-      name: 'فريق التصميم',
-      role: 'UI/UX Design',
-      description: 'متخصصون في تصميم واجهات مستخدم جميلة وسهلة الاستخدام'
+      name: "فريق التصميم",
+      role: "UI/UX Design",
+      description: "متخصصون في تصميم واجهات مستخدم جميلة وسهلة الاستخدام",
     },
     {
-      name: 'فريق المحتوى',
-      role: 'Content Creation',
-      description: 'متخصصون في إنشاء محتوى تعليمي قيّم وممتع للمستخدمين'
+      name: "فريق المحتوى",
+      role: "Content Creation",
+      description: "متخصصون في إنشاء محتوى توعوي قيّم وممتع للمستخدمين",
     },
     {
-      name: 'فريق الجودة',
-      role: 'QA & Testing',
-      description: 'متخصصون في اختبار وضمان جودة المنصة والخدمات'
+      name: "فريق الجودة",
+      role: "QA & Testing",
+      description: "متخصصون في اختبار وضمان جودة المنصة والخدمات",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,7 +128,8 @@ export default function AboutPage() {
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              منصة تعزيز الوعي المجتمعي هي مبادرة تعليمية تهدف إلى نشر المعرفة والتوعية المجتمعية من خلال أدوات تفاعلية حديثة وممتعة.
+              منصة صوتنا يبني هي مبادرة تعليمية تهدف إلى نشر المعرفة والتوعية
+              المجتمعية من خلال أدوات تفاعلية حديثة وممتعة.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -154,7 +153,9 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">مقيمنا وقيمنا</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              قيمنا
+            </h2>
             <p className="text-lg text-muted-foreground">
               ما يحرك عملنا ويوجه قراراتنا
             </p>
@@ -179,24 +180,29 @@ export default function AboutPage() {
               className="space-y-6"
             >
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">قصتنا</h2>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
+                  قصتنا
+                </h2>
               </div>
 
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                 <p>
-                  بدأت منصتنا كفكرة بسيطة: كيف يمكننا جعل التعليم أكثر متعة وتفاعلية؟
-                  لقد أدركنا أن التعليم التقليدي قد لا يكون كافياً في عصرنا الحالي.
+                  بدأت منصّتُنا كفكرة بسيطة: كيف يمكننا جعل التوعية أكثر تأثيرًا
+                  وقربًا من الناس؟ أدركنا أن الأساليب التقليدية وحدها قد لا تكون
+                  كافية في عصر تتسارع فيه التحديات.
                 </p>
 
                 <p>
-                  لذلك، قررنا بناء منصة تجمع بين التعليم والترفيه والتنافس الصحي،
-                  حيث يمكن للمستخدمين التعلم بطريقة تفاعلية وممتعة والحصول على نقاط
-                  وتحقيق إنجازات.
+                  لذلك، قررنا بناء منصة تجمع بين المعرفة والتفاعل والانخراط
+                  المجتمعي، حيث يمكن للمستخدمين التعرّف على القيم والحقوق
+                  والواجبات بأسلوب مبسّط ومُلهم، مع تشجيع المشاركة الفعّالة
+                  وتعزيز الإحساس بالمسؤولية.
                 </p>
 
                 <p>
-                  اليوم، نفخر بأننا ننجح في توفير منصة تعليمية شاملة تساهم في تطور
-                  المجتمع والأفراد، وندعوك للانضمام إلينا في هذه الرحلة الجميلة.
+                  اليوم، نفخر بأننا نساهم في نشر الوعي وتعزيز المواطنة وبناء
+                  مجتمع متماسك، وندعوك لأن تكون جزءًا من هذه الرحلة نحو مستقبل
+                  أفضل لنا جميعًا.
                 </p>
               </div>
             </motion.div>
@@ -212,7 +218,9 @@ export default function AboutPage() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">فريقنا</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+              فريقنا
+            </h2>
             <p className="text-lg text-muted-foreground">
               مجموعة من المتخصصين المحترفين الملتزمين برؤيتنا
             </p>
@@ -226,90 +234,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 md:py-24 border-t bg-card/50">
-        <div className="container px-4">
-          <div className="grid gap-8 md:grid-cols-4 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">1000+</div>
-              <p className="text-muted-foreground">مستخدم نشط</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">100+</div>
-              <p className="text-muted-foreground">مقالة تعليمية</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">50+</div>
-              <p className="text-muted-foreground">لعبة تفاعلية</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              viewport={{ once: true }}
-              className="space-y-2"
-            >
-              <div className="text-4xl font-bold text-primary">99%</div>
-              <p className="text-muted-foreground">رضا المستخدمين</p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 border-t">
-        <div className="container px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl mx-auto text-center space-y-6"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold">هل تريد الانضمام إلينا؟</h2>
-            <p className="text-lg text-muted-foreground">
-              كن جزءاً من فريقنا أو من مستخدمينا الكرام وساهم في نشر الوعي المجتمعي
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth/register">
-                <Button size="lg">
-                  إنشاء حساب جديد
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="lg" variant="outline">
-                  تواصل معنا
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t bg-card/50 py-8">
         <div className="container px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 منصة تعزيز الوعي المجتمعي. جميع الحقوق محفوظة.</p>
+          <p>© 2024 منصة صوتنا يبني. جميع الحقوق محفوظة.</p>
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -48,7 +48,7 @@ export default function DashboardPage() {
   const activities = [
     {
       title: t('articles.title'),
-      description: 'اقرأ مقالات تعليمية واختبر معلوماتك',
+      description: 'اقرأ مقالات توعوية واختبر معلوماتك',
       icon: BookOpen,
       href: '/articles',
     },

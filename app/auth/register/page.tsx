@@ -67,7 +67,7 @@ export default function RegisterPage() {
                 <h2 className="text-2xl font-bold text-foreground">مرحباً بك!</h2>
               </div>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                إنشاء حساب جديد بسيط وسريع. ابدأ رحلتك التعليمية معنا الآن
+                إنشاء حساب جديد. ابدأ رحلتك التوعوية معنا الآن
               </p>
             </div>
 
@@ -106,7 +106,7 @@ export default function RegisterPage() {
                   {t('auth.registerTitle')}
                 </CardTitle>
                 <CardDescription className="text-center text-base">
-                  أنشئ حساباً جديداً لتبدأ التعلم
+                  أنشئ حساباً جديداً لتبدأ معنا
                 </CardDescription>
               </CardHeader>
 
