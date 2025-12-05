@@ -655,40 +655,6 @@ export default function PuzzlePage() {
                   })}
                 </div>
 
-                {/* Progress */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">التقدم</span>
-                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
-                      {placedPieces.length}/{puzzleData.pieces}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <motion.div
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(placedPieces.length / puzzleData.pieces) * 100}%`,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center">
-                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">الحركات</div>
-                    <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{moves}</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4 text-center">
-                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">الصعوبة</div>
-                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400 capitalize">
-                      {puzzleData.difficulty}
-                    </div>
-                  </div>
-                </div>
-
                 {/* Action Buttons */}
                 <div className="flex gap-3 mt-6">
                   <Button

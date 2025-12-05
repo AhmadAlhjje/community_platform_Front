@@ -137,7 +137,7 @@ export function Navbar() {
               {/* Theme & Language Switchers - Desktop */}
               <div className="hidden sm:flex items-center gap-1 border-l border-border pl-2 sm:pl-3">
                 <ThemeSwitcher />
-                <LanguageSwitcher />
+                {/* <LanguageSwitcher /> */}
               </div>
 
               {/* Logout Button - Desktop */}
