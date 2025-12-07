@@ -102,7 +102,7 @@ export default function ProfilePage() {
                 <Phone className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">رقم الهاتف</p>
-                  <p className="font-medium" dir="ltr">{userDetails?.phoneNumber || user?.phoneNumber}</p>
+                  <p className="font-medium" dir="rtl">{userDetails?.phoneNumber || user?.phoneNumber}</p>
                 </div>
               </div>
 
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                     <TrendingUp className="h-5 w-5 text-muted-foreground" />
                     <p className="text-sm font-medium text-muted-foreground">ترتيبك</p>
                   </div>
-                  <p className="text-3xl font-bold">#{userPoints.rank}</p>
+                  <p className="text-3xl font-bold">{userPoints.rank}</p>
                 </div>
               )}
             </CardContent>
