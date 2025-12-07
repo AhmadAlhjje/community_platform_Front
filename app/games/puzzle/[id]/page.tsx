@@ -499,111 +499,65 @@ export default function PuzzlePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
             >
               <motion.div
-                initial={{ scale: 0.5, y: 50 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.5, y: 50 }}
-                className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden relative"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-8"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
-
                 <button
                   onClick={() => setShowSuccess(false)}
-                  className="absolute top-4 right-4 z-10 bg-white/30 hover:bg-white/50 backdrop-blur-sm rounded-full p-2 transition-colors"
+                  className="absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                   aria-label="إغلاق"
                 >
-                  <X className="h-6 w-6 text-gray-700 dark:text-white" />
+                  <X className="h-6 w-6" />
                 </button>
 
-                <div className="relative z-10 p-8 text-center space-y-6">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.15, 1],
-                      rotate: [0, 8, -8, 0],
-                      y: [0, -10, 0],
-                    }}
-                    transition={{
-                      duration: 0.6,
-                      repeat: Infinity,
-                      repeatDelay: 2,
-                    }}
-                  >
-                    <div className="mx-auto w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                      <Trophy className="h-14 w-14 text-white" />
-                    </div>
-                  </motion.div>
-
-                  <div>
-                    <motion.h2
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2"
-                    >
-                      رائع جداً!
-                    </motion.h2>
-                    <motion.p
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-gray-600 dark:text-gray-300 text-lg"
-                    >
-                      لقد حللت اللغز بنجاح
-                    </motion.p>
+                <div className="text-center space-y-6">
+                  {/* Trophy Icon */}
+                  <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Trophy className="h-12 w-12 text-primary" />
                   </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="grid grid-cols-2 gap-4"
-                  >
-                    <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">الحركات</div>
-                      <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{moves}</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">النقاط</div>
-                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">+{game.pointsReward}</div>
-                    </div>
-                  </motion.div>
+                  {/* Success Message */}
+                  <div>
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      أحسنت! 🎉
+                    </h2>
+                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                      لقد أكملت اللعبة بنجاح
+                    </p>
+                  </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-2xl p-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="bg-amber-100 dark:bg-amber-900/40 p-2 rounded-lg flex-shrink-0">
-                        <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1 uppercase">
-                          الرسالة التعليمية
-                        </p>
-                        <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
-                          {game.educationalMessage}
-                        </p>
-                      </div>
+                  {/* Stats */}
+                  <div className="flex gap-4 justify-center">
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-xl px-6 py-4 flex-1">
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">النقاط</div>
+                      <div className="text-2xl font-bold text-primary">+{game.pointsReward}</div>
                     </div>
-                  </motion.div>
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-xl px-6 py-4 flex-1">
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">الحركات</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{moves}</div>
+                    </div>
+                  </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
+                  {/* Educational Message */}
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-right">
+                    <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed">
+                      {game.educationalMessage}
+                    </p>
+                  </div>
+
+                  {/* Button */}
+                  <Button
+                    onClick={() => router.push('/games')}
+                    className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-base font-medium"
+                    size="lg"
                   >
-                    <Button
-                      onClick={() => router.push('/games')}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 text-lg font-semibold"
-                      size="lg"
-                    >
-                      العودة إلى الألعاب
-                    </Button>
-                  </motion.div>
+                    العودة إلى الألعاب
+                  </Button>
                 </div>
               </motion.div>
             </motion.div>
