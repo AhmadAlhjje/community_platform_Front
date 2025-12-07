@@ -11,10 +11,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy } from 'lucide-react'
 
+type TabType = 'puzzle' | 'crossword' | 'completed'
+
 export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [completedGameIds, setCompletedGameIds] = useState<Set<string>>(new Set())
+  const [activeTab, setActiveTab] = useState<TabType>('puzzle')
   const { t } = useTranslation()
   const router = useRouter()
   const { toast } = useToast()
@@ -70,6 +73,21 @@ export default function GamesPage() {
   const puzzleGames = games.filter((g) => g.type === 'puzzle' && !g.isCompleted)
   const crosswordGames = games.filter((g) => g.type === 'crossword' && !g.isCompleted)
   const completedGames = games.filter((g) => g.isCompleted)
+
+  const getFilteredGames = () => {
+    switch (activeTab) {
+      case 'puzzle':
+        return puzzleGames
+      case 'crossword':
+        return crosswordGames
+      case 'completed':
+        return completedGames
+      default:
+        return []
+    }
+  }
+
+  const filteredGames = getFilteredGames()
 
   const handlePlayGame = (game: Game) => {
     if (game.isCompleted) {
@@ -199,80 +217,94 @@ export default function GamesPage() {
           </p>
         </motion.div>
 
-        {puzzleGames.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-6"
+        {/* Tabs */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex gap-1 sm:gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto"
+        >
+          <button
+            onClick={() => setActiveTab('puzzle')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+              activeTab === 'puzzle'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <Puzzle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">ألعاب الأحجية</h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {puzzleGames.map((game, index) => (
-                <GameCard key={game.id} game={game} index={index} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+            <Puzzle className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">ألعاب البازل</span>
+            <span className="inline sm:hidden">البازل</span>
+            {puzzleGames.length > 0 && (
+              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 sm:px-2 py-0.5 rounded-full text-xs">
+                {puzzleGames.length}
+              </span>
+            )}
+          </button>
 
-        {crosswordGames.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-6"
+          <button
+            onClick={() => setActiveTab('crossword')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+              activeTab === 'crossword'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-                <Grid3x3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">الكلمات المتقاطعة</h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {crosswordGames.map((game, index) => (
-                <GameCard key={game.id} game={game} index={index} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+            <Grid3x3 className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">الكلمات المتقاطعة</span>
+            <span className="inline sm:hidden">متقاطعة</span>
+            {crosswordGames.length > 0 && (
+              <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-1.5 sm:px-2 py-0.5 rounded-full text-xs">
+                {crosswordGames.length}
+              </span>
+            )}
+          </button>
 
-        {completedGames.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="space-y-6"
+          <button
+            onClick={() => setActiveTab('completed')}
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
+              activeTab === 'completed'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">الألعاب المكتملة</h2>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {completedGames.map((game, index) => (
-                <GameCard key={game.id} game={game} index={index} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+            <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">تم حلها</span>
+            <span className="inline sm:hidden">محلولة</span>
+            {completedGames.length > 0 && (
+              <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-1.5 sm:px-2 py-0.5 rounded-full text-xs">
+                {completedGames.length}
+              </span>
+            )}
+          </button>
+        </motion.div>
 
-        {games.length === 0 && !loading && (
+        {/* Games Grid */}
+        {filteredGames.length > 0 ? (
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {filteredGames.map((game, index) => (
+              <GameCard key={game.id} game={game} index={index} />
+            ))}
+          </motion.div>
+        ) : (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center justify-center min-h-[300px] gap-4"
           >
-            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-6 rounded-full">
-              <Puzzle className="h-12 w-12 text-white" />
+            <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-full">
+              {activeTab === 'puzzle' && <Puzzle className="h-12 w-12 text-gray-400" />}
+              {activeTab === 'crossword' && <Grid3x3 className="h-12 w-12 text-gray-400" />}
+              {activeTab === 'completed' && <CheckCircle2 className="h-12 w-12 text-gray-400" />}
             </div>
-            <h3 className="text-xl font-bold">لا توجد ألعاب متاحة حالياً</h3>
-            <p className="text-muted-foreground">تحقق مرة أخرى لاحقاً</p>
+            <h3 className="text-xl font-bold">لا توجد ألعاب في هذا القسم</h3>
+            <p className="text-muted-foreground">جرّب قسماً آخر أو تحقق مرة أخرى لاحقاً</p>
           </motion.div>
         )}
       </div>
