@@ -7,7 +7,7 @@ import { UserDetailsResponse, UserPointsResponse } from '@/types/api'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { User as UserIcon, Mail, Trophy, Award, TrendingUp, Calendar } from 'lucide-react'
+import { User as UserIcon, Phone, Trophy, Award, TrendingUp, Calendar } from 'lucide-react'
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -99,10 +99,10 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <Mail className="h-5 w-5 text-muted-foreground" />
+                <Phone className="h-5 w-5 text-muted-foreground" />
                 <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">البريد الإلكتروني</p>
-                  <p className="font-medium">{userDetails?.email || user?.email}</p>
+                  <p className="text-sm text-muted-foreground">رقم الهاتف</p>
+                  <p className="font-medium" dir="ltr">{userDetails?.phoneNumber || user?.phoneNumber}</p>
                 </div>
               </div>
 

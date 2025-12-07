@@ -338,7 +338,8 @@ export interface UserDetailsResponse {
   data: {
     id: string
     name: string
-    email: string
+    phoneNumber: string
+    isPhoneVerified?: boolean
     points: number
     role: string
     createdAt: string
@@ -351,7 +352,7 @@ export interface LeaderboardEntry {
   rank: number
   id: string
   name: string
-  email: string
+  phoneNumber: string
   points: number
   memberSince: string
 }
