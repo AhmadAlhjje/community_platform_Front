@@ -21,8 +21,7 @@ interface PuzzleData {
 
 interface PuzzlePiece {
   id: number
-  correctX: number
-  correctY: number
+  correctSlotId: number
   image: string
 }
 
@@ -37,7 +36,7 @@ export default function PuzzlePage() {
   const [game, setGame] = useState<Game | null>(null)
   const [puzzleData, setPuzzleData] = useState<PuzzleData | null>(null)
   const [pieces, setPieces] = useState<PuzzlePiece[]>([])
-  const [slots, setSlots] = useState<number[]>([]) // سيحتوي على معرفات القطع المعروضة
+  const [slots, setSlots] = useState<number[]>([])
   const [placedPieces, setPlacedPieces] = useState<PlacedPiece[]>([])
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null)
   const [moves, setMoves] = useState(0)
@@ -46,6 +45,7 @@ export default function PuzzlePage() {
   const [startTime] = useState(Date.now())
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [gridCols, setGridCols] = useState(3)
+  const [debugMode, setDebugMode] = useState(false)
   const { t } = useTranslation()
   const { toast } = useToast()
 
@@ -58,6 +58,21 @@ export default function PuzzlePage() {
       generatePuzzlePieces()
     }
   }, [puzzleData?.imageUrl])
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault()
+        setDebugMode(prev => {
+          const newMode = !prev
+          console.log(`🔧 وضع التشخيص: ${newMode ? 'مفعّل' : 'معطّل'}`)
+          return newMode
+        })
+      }
+    }
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [])
 
   const playSound = (type: 'click' | 'success' | 'error') => {
     if (!soundEnabled) return
@@ -150,11 +165,9 @@ export default function PuzzlePage() {
 
       setPuzzleData({ ...content, imageUrl })
 
-      // حساب عدد الأعمدة بناءً على عدد القطع
       const cols = Math.ceil(Math.sqrt(content.pieces))
       setGridCols(cols)
 
-      // إنشاء فتحات فارغة
       setSlots(Array(content.pieces).fill(null))
     } catch (error) {
       console.error('Error fetching game:', error)
@@ -182,50 +195,124 @@ export default function PuzzlePage() {
           try {
             const cols = Math.ceil(Math.sqrt(puzzleData.pieces))
             const rows = Math.ceil(puzzleData.pieces / cols)
-            const pieceWidth = img.width / cols
-            const pieceHeight = img.height / rows
+
+            const CANVAS_SIZE = 600
+            const pieceWidth = CANVAS_SIZE / cols
+            const pieceHeight = CANVAS_SIZE / rows
 
             const newPieces: PuzzlePiece[] = []
             let pieceId = 0
+
+            const fullCanvas = document.createElement('canvas')
+            fullCanvas.width = CANVAS_SIZE
+            fullCanvas.height = CANVAS_SIZE
+            const fullCtx = fullCanvas.getContext('2d')
+            
+            if (!fullCtx) {
+              console.error('Failed to get canvas context')
+              resolve()
+              return
+            }
+
+            fullCtx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE)
+
+            const isPieceContentful = (canvas: HTMLCanvasElement): boolean => {
+              const ctx = canvas.getContext('2d')
+              if (!ctx) return false
+              
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+              const data = imageData.data
+              
+              let nonTransparentPixels = 0
+              let totalBrightness = 0
+              
+              for (let i = 0; i < data.length; i += 16) {
+                const alpha = data[i + 3]
+                
+                if (alpha > 10) {
+                  nonTransparentPixels++
+                  const r = data[i]
+                  const g = data[i + 1]
+                  const b = data[i + 2]
+                  const brightness = (r + g + b) / 3
+                  totalBrightness += brightness
+                }
+              }
+              
+              const avgBrightness = nonTransparentPixels > 0 ? totalBrightness / nonTransparentPixels : 0
+              
+              return nonTransparentPixels > 10 && avgBrightness > 15
+            }
 
             for (let row = 0; row < rows; row++) {
               for (let col = 0; col < cols; col++) {
                 if (pieceId >= puzzleData.pieces) break
 
+                const x = Math.floor(col * pieceWidth)
+                const y = Math.floor(row * pieceHeight)
+                
+                const width = (col === cols - 1) 
+                  ? CANVAS_SIZE - x 
+                  : Math.floor(pieceWidth)
+                  
+                const height = (row === rows - 1) 
+                  ? CANVAS_SIZE - y 
+                  : Math.floor(pieceHeight)
+
                 const pieceCanvas = document.createElement('canvas')
-                pieceCanvas.width = Math.floor(pieceWidth)
-                pieceCanvas.height = Math.floor(pieceHeight)
+                pieceCanvas.width = width
+                pieceCanvas.height = height
 
                 const pieceCtx = pieceCanvas.getContext('2d')
                 if (!pieceCtx) continue
 
                 pieceCtx.drawImage(
-                  img,
-                  Math.floor(col * pieceWidth),
-                  Math.floor(row * pieceHeight),
-                  Math.floor(pieceWidth),
-                  Math.floor(pieceHeight),
-                  0,
-                  0,
-                  Math.floor(pieceWidth),
-                  Math.floor(pieceHeight)
+                  fullCanvas,
+                  x, y, width, height,
+                  0, 0, width, height
                 )
 
-                newPieces.push({
-                  id: pieceId,
-                  correctX: col,
-                  correctY: row,
-                  image: pieceCanvas.toDataURL('image/png'),
-                })
+                const hasContent = isPieceContentful(pieceCanvas)
+                
+                if (hasContent) {
+                  // عكس ترتيب الأعمدة لتتوافق مع العرض RTL
+                  const rtlCol = (cols - 1) - col
+                  const correctSlotId = row * cols + rtlCol
+                  
+                  newPieces.push({
+                    id: pieceId,
+                    correctSlotId: correctSlotId,
+                    image: pieceCanvas.toDataURL('image/png', 1.0),
+                  })
+                  
+                  console.log(`✓ القطعة ${pieceId} تحتوي على محتوى - تمت الإضافة`, {
+                    col: col,
+                    rtlCol: rtlCol,
+                    row: row,
+                    correctSlotId: correctSlotId
+                  })
+                } else {
+                  console.log(`✗ القطعة ${pieceId} فارغة - تم تجاهلها`, {
+                    col: col,
+                    row: row
+                  })
+                }
 
                 pieceId++
               }
             }
 
-            // تعشيش القطع
-            const shuffled = newPieces.sort(() => Math.random() - 0.5)
+            const shuffled = [...newPieces].sort(() => Math.random() - 0.5)
             setPieces(shuffled)
-            console.log(`Generated ${shuffled.length} puzzle pieces`)
+            
+            setSlots(Array(shuffled.length).fill(null))
+            
+            console.log(`=== ملخص القطع ===`)
+            console.log(`إجمالي الخانات: ${puzzleData.pieces}`)
+            console.log(`القطع ذات المحتوى: ${shuffled.length}`)
+            console.log(`الشبكة: ${cols}x${rows}`)
+            console.log(`حجم القطعة: ${Math.floor(pieceWidth)}x${Math.floor(pieceHeight)}`)
+            
             resolve()
           } catch (error) {
             console.error('Error creating puzzle pieces:', error)
@@ -275,7 +362,6 @@ export default function PuzzlePage() {
       return
     }
 
-    // تحقق من أن هذا المكان فارغ
     if (placedPieces.some(p => p.slotId === slotIndex)) {
       toast({
         title: 'هذا المكان مشغول',
@@ -297,10 +383,10 @@ export default function PuzzlePage() {
   }
 
   const checkSolution = async () => {
-    if (placedPieces.length !== puzzleData?.pieces) {
+    if (placedPieces.length !== pieces.length) {
       toast({
         title: 'لم تكمل اللعبة',
-        description: `أكمل جميع القطع (${placedPieces.length}/${puzzleData?.pieces})`,
+        description: `أكمل جميع القطع (${placedPieces.length}/${pieces.length})`,
         variant: 'destructive',
       })
       playSound('error')
@@ -309,30 +395,43 @@ export default function PuzzlePage() {
 
     setChecking(true)
 
-    // التحقق من صحة الحل
     let isCorrect = true
+    let wrongPieces: number[] = []
+    
+    console.log('=== بدء التحقق من الحل ===')
+    console.log('عدد الأعمدة:', gridCols)
+    
     for (const placed of placedPieces) {
       const piece = pieces.find(p => p.id === placed.pieceId)
-      const expectedSlotId = piece!.correctY * gridCols + piece!.correctX
+      if (!piece) continue
+      
+      console.log(`القطعة ${piece.id}:`, {
+        correctSlotId: piece.correctSlotId,
+        actualSlotId: placed.slotId,
+        isCorrect: piece.correctSlotId === placed.slotId
+      })
 
-      if (expectedSlotId !== placed.slotId) {
+      if (piece.correctSlotId !== placed.slotId) {
         isCorrect = false
-        break
+        wrongPieces.push(placed.pieceId)
       }
     }
+    
+    console.log('=== نتيجة التحقق ===')
+    console.log('الحل صحيح؟', isCorrect)
+    console.log('القطع الخاطئة:', wrongPieces)
 
     if (!isCorrect) {
       playSound('error')
       toast({
         title: 'الحل غير صحيح',
-        description: 'بعض القطع في أماكن خاطئة. حاول مرة أخرى!',
+        description: `هناك ${wrongPieces.length} قطعة في أماكن خاطئة. حاول مرة أخرى!`,
         variant: 'destructive',
       })
       setChecking(false)
       return
     }
 
-    // الحل صحيح!
     playSound('success')
     const completionTime = Math.floor((Date.now() - startTime) / 1000)
 
@@ -394,7 +493,6 @@ export default function PuzzlePage() {
           </Button>
         </Link>
 
-        {/* Success Modal */}
         <AnimatePresence>
           {showSuccess && (
             <motion.div
@@ -512,7 +610,6 @@ export default function PuzzlePage() {
           )}
         </AnimatePresence>
 
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -540,9 +637,7 @@ export default function PuzzlePage() {
           </Card>
         </motion.div>
 
-        {/* Main Game Area */}
         <div className="grid lg:grid-cols-5 gap-6">
-          {/* Puzzle Grid - Left/Top */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -555,8 +650,13 @@ export default function PuzzlePage() {
                   <span>مربعات اللغز</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
-                      {placedPieces.length}/{puzzleData.pieces}
+                      {placedPieces.length}/{pieces.length}
                     </span>
+                    {debugMode && (
+                      <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded font-bold">
+                        وضع التشخيص 🔧
+                      </span>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -573,26 +673,40 @@ export default function PuzzlePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6">
+                {puzzleData?.imageUrl && (
+                  <div className="mb-4">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">الصورة الأصلية:</div>
+                    <div className="relative w-full max-w-[200px] mx-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden shadow-md">
+                      <img
+                        src={puzzleData.imageUrl}
+                        alt="Original puzzle"
+                        className="w-full h-auto object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div
-                  className="mx-auto mb-6 sm:mb-8 bg-gray-100 dark:bg-gray-900 shadow-xl"
+                  className="mx-auto mb-6 sm:mb-8 bg-white dark:bg-gray-800"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-                    gap: '0px',
+                    gap: '0',
                     maxWidth: '100%',
                     width: 'min(100%, 600px)',
                     aspectRatio: '1 / 1',
-                    border: '3px solid #9CA3AF',
+                    border: '2px solid #6B7280',
                     padding: '0',
                     margin: '0 auto',
                   }}
                 >
                   {slots.map((_, slotIndex) => {
                     const placedPiece = getPlacedPieceAtSlot(slotIndex)
-                    const col = slotIndex % gridCols
-                    const row = Math.floor(slotIndex / gridCols)
-                    const isRightEdge = col === gridCols - 1
-                    const isBottomEdge = row === Math.ceil(slots.length / gridCols) - 1
+                    
+                    let isCorrectPlacement = false
+                    if (debugMode && placedPiece) {
+                      isCorrectPlacement = placedPiece.correctSlotId === slotIndex
+                    }
 
                     return (
                       <button
@@ -603,12 +717,11 @@ export default function PuzzlePage() {
                             ? 'bg-white dark:bg-gray-800'
                             : selectedPiece !== null
                             ? 'bg-blue-100 dark:bg-blue-900/30'
-                            : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'
-                        }`}
+                            : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        } ${debugMode && placedPiece ? (isCorrectPlacement ? 'ring-2 ring-green-500' : 'ring-2 ring-red-500') : ''}`}
                         style={{
                           aspectRatio: '1 / 1',
-                          borderRight: isRightEdge ? 'none' : '1px solid #9CA3AF',
-                          borderBottom: isBottomEdge ? 'none' : '1px solid #9CA3AF',
+                          border: '1px solid #9CA3AF',
                           margin: '0',
                           padding: '0',
                         }}
@@ -619,8 +732,18 @@ export default function PuzzlePage() {
                               src={placedPiece.image}
                               alt="puzzle piece"
                               className="w-full h-full object-cover block"
-                              style={{ display: 'block', margin: '0', padding: '0' }}
+                              style={{ 
+                                display: 'block', 
+                                margin: '0', 
+                                padding: '0',
+                                imageRendering: 'crisp-edges'
+                              }}
                             />
+                            {debugMode && (
+                              <div className={`absolute top-1 right-1 ${isCorrectPlacement ? 'bg-green-500' : 'bg-red-500'} text-white text-xs px-2 py-1 rounded font-bold`}>
+                                {isCorrectPlacement ? '✓' : '✗'}
+                              </div>
+                            )}
                             <div
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -645,7 +768,6 @@ export default function PuzzlePage() {
                   })}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 mt-6">
                   <Button
                     onClick={resetGame}
@@ -668,7 +790,6 @@ export default function PuzzlePage() {
             </Card>
           </motion.div>
 
-          {/* Pieces Panel - Right/Bottom */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -709,6 +830,7 @@ export default function PuzzlePage() {
                           src={piece.image}
                           alt={`piece ${piece.id}`}
                           className="w-full h-full object-cover"
+                          style={{ imageRendering: 'crisp-edges' }}
                         />
                         {isSelected && !isPlaced && (
                           <motion.div
@@ -735,7 +857,6 @@ export default function PuzzlePage() {
           </motion.div>
         </div>
 
-        {/* Instructions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -752,6 +873,9 @@ export default function PuzzlePage() {
             <li>✓ استخدم زر "إزالة" لحذف قطعة من مكانها</li>
             <li>✓ عندما تنتهي، انقر على "تحقق من الحل"</li>
             <li>✓ إذا كانت جميع القطع في أماكنها الصحيحة ستفوز!</li>
+            <li className="text-xs text-blue-600 dark:text-blue-300 italic mt-2">
+              💡 نصيحة: اضغط Ctrl+D لتفعيل وضع التشخيص (يُظهر القطع الصحيحة بحدود خضراء)
+            </li>
           </ul>
         </motion.div>
       </div>
