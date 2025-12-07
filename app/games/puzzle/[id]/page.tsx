@@ -574,7 +574,7 @@ export default function PuzzlePage() {
               </CardHeader>
               <CardContent className="p-3 sm:p-6">
                 <div
-                  className="mx-auto mb-6 sm:mb-8 bg-white dark:bg-gray-900 border-2 border-gray-400 dark:border-gray-600"
+                  className="mx-auto mb-6 sm:mb-8 bg-gray-100 dark:bg-gray-900 shadow-xl"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
@@ -582,48 +582,62 @@ export default function PuzzlePage() {
                     maxWidth: '100%',
                     width: 'min(100%, 600px)',
                     aspectRatio: '1 / 1',
+                    border: '3px solid #9CA3AF',
+                    padding: '0',
+                    margin: '0 auto',
                   }}
                 >
                   {slots.map((_, slotIndex) => {
                     const placedPiece = getPlacedPieceAtSlot(slotIndex)
+                    const col = slotIndex % gridCols
+                    const row = Math.floor(slotIndex / gridCols)
+                    const isRightEdge = col === gridCols - 1
+                    const isBottomEdge = row === Math.ceil(slots.length / gridCols) - 1
 
                     return (
                       <button
                         key={slotIndex}
                         onClick={() => handleSlotClick(slotIndex)}
-                        className={`relative w-full h-full overflow-hidden border border-gray-300 dark:border-gray-700 ${
+                        className={`relative w-full h-full overflow-hidden ${
                           placedPiece
                             ? 'bg-white dark:bg-gray-800'
                             : selectedPiece !== null
-                            ? 'bg-blue-50 dark:bg-blue-900/20'
-                            : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ? 'bg-blue-100 dark:bg-blue-900/30'
+                            : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'
                         }`}
-                        style={{ aspectRatio: '1 / 1' }}
+                        style={{
+                          aspectRatio: '1 / 1',
+                          borderRight: isRightEdge ? 'none' : '1px solid #9CA3AF',
+                          borderBottom: isBottomEdge ? 'none' : '1px solid #9CA3AF',
+                          margin: '0',
+                          padding: '0',
+                        }}
                       >
                         {placedPiece ? (
                           <>
                             <img
                               src={placedPiece.image}
                               alt="puzzle piece"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover block"
+                              style={{ display: 'block', margin: '0', padding: '0' }}
                             />
                             <div
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleUndo(slotIndex)
                               }}
-                              className="absolute inset-0 bg-red-500/0 hover:bg-red-500/80 flex flex-col items-center justify-center text-white font-bold cursor-pointer transition-all opacity-0 hover:opacity-100"
+                              className="absolute inset-0 bg-red-600/0 hover:bg-red-600/90 flex flex-col items-center justify-center text-white font-bold cursor-pointer transition-colors duration-200 opacity-0 hover:opacity-100"
                             >
                               <X className="h-6 w-6 mb-1" />
                               <span className="text-xs">إزالة</span>
                             </div>
                           </>
                         ) : (
-                          <div className="flex items-center justify-center h-full text-2xl text-gray-300 dark:text-gray-600">
-                            {selectedPiece !== null ? '+' : ''}
+                          <div className="flex items-center justify-center h-full text-xl text-gray-400 dark:text-gray-600">
+                            {selectedPiece !== null ? '✓' : ''}
                           </div>
                         )}
-                        <div className="absolute bottom-0.5 right-0.5 bg-white/70 dark:bg-gray-800/70 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:text-gray-400">
+                        <div className="absolute bottom-1 left-1 bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-white rounded">
                           {slotIndex + 1}
                         </div>
                       </button>
