@@ -11,10 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
-import { LogIn, ArrowRight, Sparkles } from 'lucide-react'
+import { LogIn, ArrowRight, Sparkles, Phone } from 'lucide-react'
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -24,7 +26,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      await login({ email, password })
+      await login({ phoneNumber, password })
     } catch (error) {
       console.error(error)
     } finally {
@@ -96,17 +98,18 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-5 pb-6">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground font-medium">
-                      {t('auth.email')}
+                    <Label htmlFor="phoneNumber" className="text-foreground font-medium">
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        رقم الهاتف
+                      </div>
                     </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="أدخل بريدك الإلكتروني"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-11 text-base"
-                      required
+                    <PhoneInput
+                      international
+                      defaultCountry="SY"
+                      value={phoneNumber}
+                      onChange={(value) => setPhoneNumber(value || '')}
+                      className="phone-input-custom"
                     />
                   </div>
 

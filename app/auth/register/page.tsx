@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Button } from '@/components/ui/button'
@@ -11,26 +11,82 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
-import { UserPlus, ArrowRight, Sparkles } from 'lucide-react'
+import { UserPlus, ArrowRight, Sparkles, Phone, Shield, AlertCircle } from 'lucide-react'
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
+  const [showOTP, setShowOTP] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [hasPendingVerification, setHasPendingVerification] = useState(false)
+  const { register, verifyOTP, resendOTP } = useAuth()
   const { t } = useTranslation()
+
+  // Check for pending verification on component mount
+  useEffect(() => {
+    const pendingPhone = localStorage.getItem('pendingVerificationPhone')
+    if (pendingPhone) {
+      setPhoneNumber(pendingPhone)
+      setHasPendingVerification(true)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await register({ name, email, password })
+      await register({ name, phoneNumber, password })
+      // Save phone number to localStorage for pending verification
+      localStorage.setItem('pendingVerificationPhone', phoneNumber)
+      setShowOTP(true)
+      setHasPendingVerification(false)
     } catch (error) {
       console.error(error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setVerifying(true)
+    try {
+      await verifyOTP({ phoneNumber, code: otp })
+      // Clear pending verification from localStorage on success
+      localStorage.removeItem('pendingVerificationPhone')
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  const handleResendOTP = async () => {
+    setResending(true)
+    try {
+      await resendOTP({ phoneNumber })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setResending(false)
+    }
+  }
+
+  const handleOpenOTPForm = () => {
+    setShowOTP(true)
+    setHasPendingVerification(false)
+  }
+
+  const handleCancelPendingVerification = () => {
+    localStorage.removeItem('pendingVerificationPhone')
+    setPhoneNumber('')
+    setHasPendingVerification(false)
   }
 
   return (
@@ -95,6 +151,43 @@ export default function RegisterPage() {
             transition={{ duration: 0.5 }}
             className="w-full"
           >
+            {/* Pending Verification Alert */}
+            <AnimatePresence>
+              {hasPendingVerification && !showOTP && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-4"
+                >
+                  <Card className="border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-orange-900 dark:text-orange-100 mb-1">
+                            لديك تسجيل غير مكتمل
+                          </h3>
+                          <p className="text-sm text-orange-800 dark:text-orange-200 mb-3">
+                            رقم الهاتف <span className="font-mono font-bold">{phoneNumber}</span> في انتظار التحقق
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={handleOpenOTPForm}
+                              size="sm"
+                              className="bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                              إدخال رمز التحقق
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <Card className="border-0 shadow-lg">
               <CardHeader className="space-y-2 pb-6">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -110,87 +203,156 @@ export default function RegisterPage() {
                 </CardDescription>
               </CardHeader>
 
-              <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-5 pb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-foreground font-medium">
-                      {t('auth.name')}
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="أدخل اسمك الكامل"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="h-11 text-base"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground font-medium">
-                      {t('auth.email')}
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="أدخل بريدك الإلكتروني"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="h-11 text-base"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-foreground font-medium">
-                      {t('auth.password')}
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="أدخل كلمة المرور (8 أحرف على الأقل)"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 text-base"
-                      required
-                    />
-                  </div>
-                </CardContent>
-
-                <CardFooter className="flex flex-col gap-4 pt-2">
-                  <Button
-                    type="submit"
-                    className="w-full h-11 text-base font-medium"
-                    disabled={loading}
-                  >
-                    {loading ? t('common.loading') : t('auth.registerButton')}
-                    {!loading && <ArrowRight className="h-4 w-4 ml-2" />}
-                  </Button>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border"></div>
+              {!showOTP ? (
+                <form onSubmit={handleSubmit}>
+                  <CardContent className="space-y-5 pb-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-foreground font-medium">
+                        {t('auth.name')}
+                      </Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="أدخل اسمك الكامل"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="h-11 text-base"
+                        required
+                      />
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-card text-muted-foreground">
-                        هل لديك حساب بالفعل؟
-                      </span>
-                    </div>
-                  </div>
 
-                  <Link href="/auth/login" className="w-full">
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumber" className="text-foreground font-medium">
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          رقم الهاتف
+                        </div>
+                      </Label>
+                      <PhoneInput
+                        international
+                        defaultCountry="SY"
+                        value={phoneNumber}
+                        onChange={(value) => setPhoneNumber(value || '')}
+                        className="phone-input-custom"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-foreground font-medium">
+                        {t('auth.password')}
+                      </Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="أدخل كلمة المرور (8 أحرف على الأقل)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-11 text-base"
+                        required
+                        minLength={8}
+                      />
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="flex flex-col gap-4 pt-2">
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-base font-medium"
+                      disabled={loading}
+                    >
+                      {loading ? t('common.loading') : t('auth.registerButton')}
+                      {!loading && <ArrowRight className="h-4 w-4 ml-2" />}
+                    </Button>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-border"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-card text-muted-foreground">
+                          هل لديك حساب بالفعل؟
+                        </span>
+                      </div>
+                    </div>
+
+                    <Link href="/auth/login" className="w-full">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-11 text-base font-medium"
+                      >
+                        {t('auth.loginHere')}
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOTP}>
+                  <CardContent className="space-y-5 pb-6">
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">
+                            تم إرسال رمز التحقق
+                          </p>
+                          <p className="text-muted-foreground">
+                            أدخل الرمز المرسل إلى رقم {phoneNumber}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="otp" className="text-foreground font-medium">
+                        رمز التحقق
+                      </Label>
+                      <Input
+                        id="otp"
+                        type="text"
+                        placeholder="ادخل الرمز"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="h-11 text-center tracking-widest text-2xl font-bold"
+                        required
+                        maxLength={6}
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={handleResendOTP}
+                      disabled={resending}
+                    >
+                      {resending ? 'جاري الإرسال...' : 'إعادة إرسال الرمز'}
+                    </Button>
+                  </CardContent>
+
+                  <CardFooter className="flex flex-col gap-4 pt-2">
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-base font-medium"
+                      disabled={verifying || otp.length !== 6}
+                    >
+                      {verifying ? 'جاري التحقق...' : 'تحقق من الرمز'}
+                      {!verifying && <ArrowRight className="h-4 w-4 ml-2" />}
+                    </Button>
+
                     <Button
                       type="button"
                       variant="outline"
                       className="w-full h-11 text-base font-medium"
+                      onClick={() => setShowOTP(false)}
                     >
-                      {t('auth.loginHere')}
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      العودة للتسجيل
                     </Button>
-                  </Link>
-                </CardFooter>
-              </form>
+                  </CardFooter>
+                </form>
+              )}
             </Card>
 
             <p className="text-sm text-center text-muted-foreground mt-6">

@@ -95,3 +95,85 @@
     direction: ltr;
   }
 }
+
+/* Custom styles for react-phone-number-input */
+.phone-input-custom {
+  @apply w-full;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0;
+}
+
+.phone-input-custom .PhoneInputInput {
+  @apply flex-1 h-11 px-3 py-2 text-base bg-background text-foreground border border-input;
+  @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0;
+  @apply disabled:cursor-not-allowed disabled:opacity-50;
+  @apply rounded-l-lg;
+  direction: ltr;
+  border-right: none;
+}
+
+.phone-input-custom .PhoneInputCountry {
+  @apply bg-background border border-input px-3;
+  @apply rounded-r-lg;
+  @apply hover:bg-accent/50 transition-colors;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: none;
+  min-width: 80px;
+}
+
+.phone-input-custom .PhoneInputCountrySelect {
+  @apply bg-transparent text-foreground cursor-pointer;
+  @apply focus:outline-none;
+  font-size: 14px;
+  border: none;
+}
+
+.phone-input-custom .PhoneInputCountryIcon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-input-custom .PhoneInputCountryIconImg {
+  width: 28px;
+  height: 21px;
+  object-fit: cover;
+}
+
+.phone-input-custom .PhoneInputCountrySelectArrow {
+  @apply text-muted-foreground;
+  margin-left: 4px;
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+
+/* Focus state */
+.phone-input-custom:focus-within .PhoneInputInput {
+  @apply ring-2 ring-ring;
+}
+
+.phone-input-custom:focus-within .PhoneInputCountry {
+  @apply ring-2 ring-ring border-input;
+}
+
+/* Dark mode adjustments */
+.dark .phone-input-custom .PhoneInputInput {
+  @apply bg-background text-foreground border-input;
+}
+
+.dark .phone-input-custom .PhoneInputCountry {
+  @apply bg-background border-input;
+  @apply hover:bg-accent/30;
+}
+
+.dark .phone-input-custom .PhoneInputCountrySelect {
+  @apply text-foreground;
+}
+

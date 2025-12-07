@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/lib/store/auth-store'
 import { apiClient } from '@/lib/api-client'
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/api'
+import { AuthResponse, LoginRequest, RegisterRequest, VerifyOTPRequest, ResendOTPRequest, User } from '@/types/api'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 
@@ -23,8 +23,8 @@ export function useAuth() {
 
         // Show success message
         toast({
-          title: 'Success',
-          description: response.message || 'Logged in successfully',
+          title: 'نجح تسجيل الدخول',
+          description: response.message || 'تم تسجيل الدخول بنجاح',
           variant: 'success',
         })
 
@@ -33,12 +33,12 @@ export function useAuth() {
 
         return response
       } else {
-        throw new Error(response.message || 'Login failed')
+        throw new Error(response.message || 'فشل تسجيل الدخول')
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Login failed',
+        title: 'خطأ',
+        description: error.message || 'فشل تسجيل الدخول',
         variant: 'destructive',
       })
       throw error
@@ -47,20 +47,50 @@ export function useAuth() {
 
   const register = async (data: RegisterRequest) => {
     try {
-      const response = await apiClient.post<AuthResponse>(
+      const response = await apiClient.post<{ success: boolean; message: string }>(
         '/api/auth/register',
         data
       )
 
       // Check if registration was successful
+      if (response.success) {
+        // Show success message - OTP sent
+        toast({
+          title: 'تم إرسال رمز التحقق',
+          description: response.message || 'تم إرسال رمز التحقق إلى رقم هاتفك',
+          variant: 'success',
+        })
+
+        return response
+      } else {
+        throw new Error(response.message || 'فشل التسجيل')
+      }
+    } catch (error: any) {
+      toast({
+        title: 'خطأ',
+        description: error.message || 'فشل التسجيل',
+        variant: 'destructive',
+      })
+      throw error
+    }
+  }
+
+  const verifyOTP = async (data: VerifyOTPRequest) => {
+    try {
+      const response = await apiClient.post<AuthResponse>(
+        '/api/auth/verify',
+        data
+      )
+
+      // Check if verification was successful
       if (response.success && response.data) {
         // Save user and token
         setAuth(response.data.user, response.data.token)
 
         // Show success message
         toast({
-          title: 'Success',
-          description: response.message || 'Account created successfully',
+          title: 'تم التحقق بنجاح',
+          description: response.message || 'تم إنشاء حسابك بنجاح',
           variant: 'success',
         })
 
@@ -69,12 +99,41 @@ export function useAuth() {
 
         return response
       } else {
-        throw new Error(response.message || 'Registration failed')
+        throw new Error(response.message || 'فشل التحقق من الرمز')
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'Registration failed',
+        title: 'خطأ',
+        description: error.message || 'فشل التحقق من الرمز',
+        variant: 'destructive',
+      })
+      throw error
+    }
+  }
+
+  const resendOTP = async (data: ResendOTPRequest) => {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>(
+        '/api/auth/resend-otp',
+        data
+      )
+
+      // Check if resend was successful
+      if (response.success) {
+        toast({
+          title: 'تم إعادة الإرسال',
+          description: response.message || 'تم إرسال رمز التحقق مرة أخرى',
+          variant: 'success',
+        })
+
+        return response
+      } else {
+        throw new Error(response.message || 'فشل إعادة إرسال الرمز')
+      }
+    } catch (error: any) {
+      toast({
+        title: 'خطأ',
+        description: error.message || 'فشل إعادة إرسال الرمز',
         variant: 'destructive',
       })
       throw error
@@ -114,6 +173,8 @@ export function useAuth() {
     isAuthenticated,
     login,
     register,
+    verifyOTP,
+    resendOTP,
     logout,
     getProfile,
   }

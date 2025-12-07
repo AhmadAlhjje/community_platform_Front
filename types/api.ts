@@ -2,7 +2,8 @@
 export interface User {
   id: string
   name: string
-  email: string
+  phoneNumber: string
+  email?: string
   role: 'user' | 'admin'
   points: number
   createdAt: string
@@ -19,14 +20,23 @@ export interface AuthResponse {
 }
 
 export interface LoginRequest {
-  email: string
+  phoneNumber: string
   password: string
 }
 
 export interface RegisterRequest {
   name: string
-  email: string
+  phoneNumber: string
   password: string
+}
+
+export interface VerifyOTPRequest {
+  phoneNumber: string
+  code: string
+}
+
+export interface ResendOTPRequest {
+  phoneNumber: string
 }
 
 // Category Types
