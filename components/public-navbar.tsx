@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { apiClient } from '@/lib/api-client'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 
 export function PublicNavbar() {
   const pathname = usePathname()
@@ -84,14 +85,23 @@ export function PublicNavbar() {
             <div className="flex items-center gap-3 sm:gap-4">
               <Link
                 href={user ? "/dashboard" : "/"}
-                className="flex items-center gap-2 group"
+                className="flex items-center gap-3 group"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow"
+                  className="relative w-14 h-14 sm:w-16 sm:h-16"
                 >
-                  <span className="text-primary-foreground font-bold text-sm">م</span>
+                  <Image
+                    src="/images/logo.jpg"
+                    alt="صوتنا يبني"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
                 </motion.div>
+                <span className="hidden md:block text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  صوتنا يبني
+                </span>
               </Link>
 
               {/* Desktop Navigation - Center */}
@@ -209,10 +219,15 @@ export function PublicNavbar() {
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">م</span>
+                  <div className="relative w-8 h-8">
+                    <Image
+                      src="/images/logo.jpg"
+                      alt="صوتنا يبني"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
-                  <span className="font-bold text-foreground">{t('common.appName')}</span>
+                  <span className="font-bold text-foreground">صوتنا يبني</span>
                 </Link>
                 <Button
                   variant="ghost"

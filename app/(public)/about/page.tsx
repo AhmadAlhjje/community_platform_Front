@@ -2,13 +2,14 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useTranslation } from "@/hooks/use-translation";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { PublicNavbar } from "@/components/public-navbar";
 import { Users, Target, Lightbulb, Heart, Zap, ArrowRight } from "lucide-react";
 
-const TeamMember = ({ name, role, description, delay }: any) => (
+const TeamMember = ({ name, role, description, image, delay }: any) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -16,15 +17,24 @@ const TeamMember = ({ name, role, description, delay }: any) => (
     viewport={{ once: true }}
     className="group"
   >
-    <div className="relative bg-card border rounded-xl p-6 overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300">
+    <div className="relative bg-card border rounded-xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-      <div className="relative space-y-3">
-        <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-          <Users className="h-7 w-7 text-primary" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground">{name}</h3>
-        <p className="text-sm text-primary font-medium">{role}</p>
+      {/* صورة العضو */}
+      <div className="relative aspect-square overflow-hidden">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      </div>
+
+      {/* معلومات العضو */}
+      <div className="relative p-6 space-y-2">
+        <h3 className="text-xl font-bold text-foreground">{name}</h3>
+        <p className="text-sm text-primary font-semibold">{role}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {description}
         </p>
@@ -90,21 +100,25 @@ export default function AboutPage() {
       role: "Backend & Frontend",
       description:
         "متخصصون في بناء تطبيقات ويب قوية وموثوقة باستخدام أحدث التقنيات",
+      image: "/images/OIP1.webp",
     },
     {
       name: "فريق التصميم",
       role: "UI/UX Design",
       description: "متخصصون في تصميم واجهات مستخدم جميلة وسهلة الاستخدام",
+      image: "/images/OIP2.jpeg",
     },
     {
       name: "فريق المحتوى",
       role: "Content Creation",
       description: "متخصصون في إنشاء محتوى توعوي قيّم وممتع للمستخدمين",
+      image: "/images/hero-community.webp",
     },
     {
       name: "فريق الجودة",
       role: "QA & Testing",
       description: "متخصصون في اختبار وضمان جودة المنصة والخدمات",
+      image: "/images/OIP1.webp",
     },
   ];
 
@@ -113,8 +127,16 @@ export default function AboutPage() {
       <PublicNavbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-12 md:py-20 border-b">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+      <section
+        className="relative py-12 md:py-20 border-b"
+        style={{
+          backgroundImage: 'url(/images/OIP1.webp)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50" />
 
         <div className="container relative px-4 space-y-8">
           <motion.div
@@ -123,11 +145,11 @@ export default function AboutPage() {
             transition={{ duration: 0.5 }}
             className="max-w-2xl"
           >
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-foreground">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-white drop-shadow-lg">
               من نحن وماذا نفعل
             </h1>
 
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+            <p className="text-lg text-white/95 mb-8 leading-relaxed drop-shadow-md">
               منصة صوتنا يبني هي مبادرة تعليمية تهدف إلى نشر المعرفة والتوعية
               المجتمعية من خلال أدوات تفاعلية حديثة وممتعة.
             </p>
@@ -172,10 +194,11 @@ export default function AboutPage() {
       {/* Story Section */}
       <section className="py-16 md:py-24 border-t bg-card/50">
         <div className="container px-4">
-          <div className="max-w-3xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* النص */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="space-y-6"
             >
@@ -204,6 +227,23 @@ export default function AboutPage() {
                   مجتمع متماسك، وندعوك لأن تكون جزءًا من هذه الرحلة نحو مستقبل
                   أفضل لنا جميعًا.
                 </p>
+              </div>
+            </motion.div>
+
+            {/* الصورة */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-2xl">
+                <Image
+                  src="/images/OIP2.jpeg"
+                  alt="قصتنا"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </motion.div>
           </div>
