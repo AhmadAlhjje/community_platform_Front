@@ -8,7 +8,9 @@ import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Button } from '@/components/ui/button'
 import { PublicNavbar } from '@/components/public-navbar'
-import { BookOpen, Gamepad2, MessageSquare, Trophy, Sparkles, ArrowRight } from 'lucide-react'
+import { ActivePollsTicker } from '@/components/active-polls-ticker'
+import { BookOpen, Gamepad2, MessageSquare, Trophy, Sparkles, ArrowRight, Users, Heart, Handshake } from 'lucide-react'
+import Image from 'next/image'
 
 const FeatureCard = ({ icon: Icon, title, description, delay }: any) => (
   <motion.div
@@ -70,43 +72,170 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <PublicNavbar />
 
+      {/* Active Polls Ticker */}
+      <ActivePollsTicker />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden py-12 md:py-20 border-b">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
 
-        <div className="container relative px-4 space-y-8">
+        <div className="container relative px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              className="space-y-8"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+                  <span className="text-foreground">منصة </span>
+                  <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                   صوتنا يبني
+                  </span>
+                </h1>
+
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                  شارك بطريقة تفاعلية وممتعة من خلال المقالات والألعاب التعليمية والاستبيانات المجتمعية. احصل على نقاط وتنافس مع المستخدمين الآخرين.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link href="/auth/register">
+                    <Button size="lg" className="w-full sm:w-auto group">
+                      إنشاء حساب جديد
+                      <motion.div
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                      >
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </motion.div>
+                    </Button>
+                  </Link>
+                  <Link href="/auth/login">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                      دخول
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="relative"
+            >
+              <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src="/images/hero-community.webp"
+                  alt="منصة صوتنا يبني"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Impact Section */}
+      <section className="py-16 md:py-24 bg-card/30">
+        <div className="container px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-2xl"
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
           >
-
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-              <span className="text-foreground">منصة </span>
-              <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-               صوتنا يبني
-              </span>
-            </h1>
-
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              شارك بطريقة تفاعلية وممتعة من خلال المقالات والألعاب التعليمية والاستبيانات المجتمعية. احصل على نقاط وتنافس مع المستخدمين الآخرين.
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">صوتنا في خدمة الوطن</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              معاً نبني مجتمع واعي ومتماسك من خلال مشاركة الشباب الفعّالة
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/auth/register">
-                <Button size="lg" className="w-full sm:w-auto">
-                  إنشاء حساب جديد
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/auth/login">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  دخول
-                </Button>
-              </Link>
-            </div>
           </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              viewport={{ once: true }}
+              className="relative group"
+            >
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src="/images/OIP1.webp"
+                  alt="مشاركة الشباب"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-bold text-white">مشاركة الشباب</h3>
+                  </div>
+                  <p className="text-sm text-white/90">صوت كل شاب له تأثير في بناء المجتمع</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              viewport={{ once: true }}
+              className="relative group"
+            >
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src="/images/OIP2.jpeg"
+                  alt="التماسك المجتمعي"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Handshake className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-bold text-white">التماسك المجتمعي</h3>
+                  </div>
+                  <p className="text-sm text-white/90">نبني مستقبلنا معاً بالتعاون والتكاتف</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              viewport={{ once: true }}
+              className="relative group"
+            >
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src="/images/hero-community.webp"
+                  alt="حب الوطن"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-bold text-white">حب الوطن</h3>
+                  </div>
+                  <p className="text-sm text-white/90">بالعمل والإنجاز نعبّر عن حبنا لوطننا</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -134,6 +263,90 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Platform Overview Section */}
+      <section className="py-16 md:py-24 border-t bg-card/20">
+        <div className="container px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="relative aspect-video rounded-xl overflow-hidden shadow-xl">
+                <Image
+                  src="/images/hero-community.webp"
+                  alt="نظرة عامة على المنصة"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold">منصة تفاعلية لبناء الوعي</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                صوتنا يبني هي منصة رقمية مبتكرة تهدف إلى تعزيز الوعي المجتمعي من خلال المحتوى التفاعلي والمشاركة الفعّالة. نوفر لك الأدوات اللازمة للتعلم والتطور والمساهمة في بناء مجتمع أفضل.
+              </p>
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">تعلم بطريقة ممتعة</h3>
+                    <p className="text-sm text-muted-foreground">مقالات وألعاب تفاعلية تجعل التعلم تجربة ممتعة</p>
+                  </div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">شارك رأيك</h3>
+                    <p className="text-sm text-muted-foreground">ساهم في الاستبيانات وشارك أفكارك مع المجتمع</p>
+                  </div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  viewport={{ once: true }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Trophy className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">تنافس وتطور</h3>
+                    <p className="text-sm text-muted-foreground">احصل على نقاط وتنافس مع الآخرين في لوحة الصدارة</p>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-16 md:py-24 border-t">
         <div className="container px-4">
@@ -149,9 +362,14 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/auth/register">
-                <Button size="lg">
+                <Button size="lg" className="group">
                   إنشاء حساب
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </motion.div>
                 </Button>
               </Link>
               <Link href="/auth/login">

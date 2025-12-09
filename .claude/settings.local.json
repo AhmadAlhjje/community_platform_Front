@@ -23,7 +23,9 @@
       "Bash(git commit:*)",
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(timeout 5 bash:*)"
     ],
     "deny": [],
     "ask": []
