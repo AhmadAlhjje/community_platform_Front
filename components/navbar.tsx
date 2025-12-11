@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { apiClient } from '@/lib/api-client'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -82,14 +83,20 @@ export function Navbar() {
             {/* Left: Logo and Brand */}
             <div className="flex items-center gap-3 sm:gap-4">
               <Link
-                href={user ? "/dashboard" : "/"}
-                className="flex items-center gap-2 group"
+                href="/dashboard"
+                className="flex items-center gap-3 group"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow"
+                  className="relative w-12 h-12 sm:w-14 sm:h-14"
                 >
-                  <span className="text-primary-foreground font-bold text-sm">م</span>
+                  <Image
+                    src="/images/logo.png"
+                    alt="صوتنا يبني"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
                 </motion.div>
               </Link>
 
@@ -198,11 +205,16 @@ export function Navbar() {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">م</span>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  <div className="relative w-8 h-8">
+                    <Image
+                      src="/images/logo.png"
+                      alt="صوتنا يبني"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
-                  <span className="font-bold text-foreground">{t('common.appName')}</span>
+                  <span className="font-bold text-foreground">صوتنا يبني</span>
                 </Link>
                 <Button
                   variant="ghost"

@@ -9,7 +9,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Clock, CheckCircle2, Video, Calendar, Award } from 'lucide-react'
+import { Clock, CheckCircle2, Video, Calendar, Award, MessageSquare, Sparkles } from 'lucide-react'
+import Image from 'next/image'
 
 interface PollOption {
   id: string
@@ -253,55 +254,126 @@ export default function PollsPage() {
   // Show discussion if poll ended and discussion exists
   if (pollEnded && latestDiscussion) {
     return (
-      <div className="space-y-6 max-w-3xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold">الجلسات الحوارية</h1>
-          <p className="text-muted-foreground">انتهى الاستطلاع - إليك الجلسة القادمة</p>
-        </div>
+      <div className="space-y-8">
+        {/* Discussion Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+          style={{
+            backgroundImage: 'url(/images/hero-community.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
 
-        <Card className="border-primary/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Video className="h-6 w-6 text-primary" />
-              {latestDiscussion.title}
-            </CardTitle>
-            <CardDescription className="text-base">{latestDiscussion.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg space-y-2">
-              {latestDiscussion.dateTime && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {new Date(latestDiscussion.dateTime).toLocaleString('ar-EG', {
-                      dateStyle: 'full',
-                      timeStyle: 'short',
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {meetLink && (
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={() => window.open(meetLink, '_blank')}
+          <div className="relative space-y-4">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-full border border-green-200 dark:border-green-800"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                <Video className="h-5 w-5 ml-2" />
-                الانضمام إلى الجلسة
-              </Button>
-            )}
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </motion.div>
+              <span className="text-green-700 dark:text-green-400 font-semibold">انتهى الاستطلاع</span>
+            </motion.div>
 
-            {!meetLink && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  رابط الجلسة سيتم إضافته قريباً
-                </p>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+              الجلسة <span className="text-primary">الحوارية القادمة</span>
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
+              شارك في النقاش المباشر وأضف صوتك إلى الحوار
+            </p>
+          </div>
+        </motion.div>
+
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="relative overflow-hidden border-primary/50 shadow-xl">
+              <div className="absolute inset-0 opacity-10">
+                <Image src="/images/OIP2.jpeg" alt="Discussion" fill className="object-cover" />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/95 to-background/98" />
+
+              <CardHeader className="relative">
+                <div className="flex items-start gap-3 mb-4">
+                  <motion.div
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    className="w-14 h-14 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
+                  >
+                    <Video className="h-7 w-7 text-white" />
+                  </motion.div>
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl">{latestDiscussion.title}</CardTitle>
+                    <CardDescription className="text-base mt-2">{latestDiscussion.description}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="relative space-y-4">
+                {latestDiscussion.dateTime && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="flex items-center gap-3 p-4 bg-primary/5 rounded-lg border border-primary/20"
+                  >
+                    <Calendar className="h-5 w-5 text-primary flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">موعد الجلسة</p>
+                      <p className="font-semibold">
+                        {new Date(latestDiscussion.dateTime).toLocaleString('ar-EG', {
+                          dateStyle: 'full',
+                          timeStyle: 'short',
+                        })}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {meetLink ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary/90 shadow-lg"
+                      size="lg"
+                      onClick={() => window.open(meetLink, '_blank')}
+                    >
+                      <Video className="h-5 w-5 ml-2" />
+                      <span className="font-semibold">الانضمام إلى الجلسة</span>
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg text-center"
+                  >
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                      ⏳ رابط الجلسة سيتم إضافته قريباً
+                    </p>
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
@@ -309,30 +381,81 @@ export default function PollsPage() {
   // Show message if poll ended but no matching discussion
   if (pollEnded && !latestDiscussion) {
     return (
-      <div className="space-y-6 max-w-3xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold">الجلسات الحوارية</h1>
-          <p className="text-muted-foreground">انتهى الاستطلاع</p>
-        </div>
+      <div className="space-y-8">
+        {/* Thank You Hero */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+          style={{
+            backgroundImage: 'url(/images/OIP1.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
-              شكراً لتصويتك!
-            </CardTitle>
-            <CardDescription>
-              سيتم إضافة جلسة حوارية قريباً
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                لم يتم إضافة جلسة حوارية تابعة لهذا الاستطلاع حتى الآن
+          <div className="relative flex flex-col items-center text-center space-y-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2, stiffness: 200 }}
+            >
+              <div className="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                شكراً <span className="text-primary">لتصويتك!</span>
+              </h1>
+              <p className="text-xl text-muted-foreground mt-4">
+                انتهى الاستطلاع - رأيك مهم لنا
               </p>
-            </div>
-          </CardContent>
-        </Card>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5">
+                <Image src="/images/hero-community.webp" alt="Thank You" fill className="object-cover" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-background/95 to-background/98" />
+
+              <CardContent className="relative p-8 text-center space-y-6">
+                <div className="text-6xl mb-4">🙏</div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">تم استلام تصويتك</h3>
+                  <p className="text-muted-foreground">
+                    شكراً لمشاركتك في بناء مجتمع أفضل
+                  </p>
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg"
+                >
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                    ⏳ سيتم الإعلان عن الجلسة الحوارية قريباً
+                  </p>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
@@ -340,24 +463,80 @@ export default function PollsPage() {
   // Show poll voting (default state) if poll exists
   if (latestPoll) {
     return (
-      <div className="space-y-6 max-w-3xl mx-auto">
-        <div>
-          <h1 className="text-3xl font-bold">الستبيان الوعي المجتمعي</h1>
-          <p className="text-muted-foreground">شارك رأيك وساهم في بناء مجتمعنا</p>
-        </div>
+      <div className="space-y-8">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+          style={{
+            backgroundImage: 'url(/images/OIP2.jpeg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
 
-        <Card className="border-primary/50">
-          <CardHeader>
-            <CardTitle className="text-2xl">{latestPoll.title || 'استطلاع الرأي'}</CardTitle>
+          <div className="relative space-y-4">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <MessageSquare className="h-5 w-5 text-primary" />
+              </motion.div>
+              <span className="text-primary font-semibold">شارك برأيك!</span>
+            </motion.div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+              صوّت وشارك في <span className="text-primary">القرارات!</span>
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
+              استبيانات مجتمعية لمعرفة آراء الجميع وبناء مستقبل أفضل
+            </p>
+          </div>
+        </motion.div>
+
+        <div className="max-w-3xl mx-auto space-y-6">
+          <Card className="relative overflow-hidden border-primary/50 shadow-xl">
+          {/* صورة الخلفية */}
+          <div className="absolute inset-0 opacity-10">
+            <Image src="/images/OIP2.jpeg" alt="Poll" fill className="object-cover" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background/95 to-background/98" />
+
+          <CardHeader className="relative">
+            <div className="flex items-start justify-between">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.5 }}
+                className="w-14 h-14 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg"
+              >
+                <MessageSquare className="h-7 w-7 text-white" />
+              </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-200/50 dark:border-amber-800/50"
+              >
+                <Award className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                  {latestPoll.pointsReward} نقطة
+                </span>
+              </motion.div>
+            </div>
+            <CardTitle className="text-2xl mt-4">{latestPoll.title || 'استطلاع الرأي'}</CardTitle>
             {latestPoll.description && (
               <CardDescription className="text-base">{latestPoll.description}</CardDescription>
             )}
             <CardDescription className="flex items-center gap-2 mt-2">
               <Clock className="h-4 w-4" />
-              الوقت المتبقي: {timeRemaining}
-            </CardDescription>
-            <CardDescription className="text-sm">
-              اكسب {latestPoll.pointsReward} نقطة بالتصويت
+              الوقت المتبقي: <span className="font-semibold text-primary">{timeRemaining}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -412,14 +591,30 @@ export default function PollsPage() {
               })}
 
               {!hasVoted && (
-                <Button
-                  className="w-full mt-4"
-                  size="lg"
-                  onClick={handleVote}
-                  disabled={!selectedVote || voting}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {voting ? 'جاري التصويت...' : 'تأكيد التصويت'}
-                </Button>
+                  <Button
+                    className="w-full mt-4 relative bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary/90 shadow-lg hover:shadow-xl"
+                    size="lg"
+                    onClick={handleVote}
+                    disabled={!selectedVote || voting}
+                  >
+                    <span className="font-semibold">
+                      {voting ? 'جاري التصويت...' : 'تأكيد التصويت'}
+                    </span>
+                    {!voting && (
+                      <motion.div
+                        animate={{ x: [-2, 0, -2] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="mr-2"
+                      >
+                        <CheckCircle2 className="h-5 w-5" />
+                      </motion.div>
+                    )}
+                  </Button>
+                </motion.div>
               )}
 
               {hasVoted && (
@@ -446,26 +641,93 @@ export default function PollsPage() {
             </CardHeader>
           </Card>
         )}
+        </div>
       </div>
     )
   }
 
   // Fallback if no poll and no discussion
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold">الستبيان الوعي المجتمعي</h1>
-        <p className="text-muted-foreground">لا توجد استطلاعات نشطة حالياً</p>
-      </div>
+    <div className="space-y-8">
+      {/* No Polls Hero */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+        style={{
+          backgroundImage: 'url(/images/OIP2.jpeg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>بانتظار استطلاع جديد</CardTitle>
-          <CardDescription>
-            سيتم إشعارك عند توفر استطلاع جديد
-          </CardDescription>
-        </CardHeader>
-      </Card>
+        <div className="relative space-y-4">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <MessageSquare className="h-5 w-5 text-primary" />
+            </motion.div>
+            <span className="text-primary font-semibold">الاستبيانات المجتمعية</span>
+          </motion.div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            لا توجد استطلاعات <span className="text-primary">حالياً</span>
+          </h1>
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
+            تابعنا للحصول على إشعار عند إضافة استطلاع جديد
+          </p>
+        </div>
+      </motion.div>
+
+      <div className="max-w-3xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="relative overflow-hidden">
+            <div className="absolute inset-0 opacity-5">
+              <Image src="/images/hero-community.webp" alt="Waiting" fill className="object-cover" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-background/95 to-background/98" />
+
+            <CardContent className="relative p-8 text-center space-y-6">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-6xl mb-4"
+              >
+                📋
+              </motion.div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">بانتظار استطلاع جديد</h3>
+                <p className="text-muted-foreground">
+                  سيتم إشعارك فوراً عند توفر استطلاع جديد
+                </p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg"
+              >
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                  💡 تابع المنصة للمشاركة في الاستطلاعات القادمة وكسب النقاط
+                </p>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   )
 }

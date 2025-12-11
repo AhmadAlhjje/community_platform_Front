@@ -4,8 +4,9 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Gamepad2, MessageSquare, Trophy, ArrowRight } from 'lucide-react'
+import { BookOpen, Gamepad2, MessageSquare, Trophy, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const ActivityCard = ({ activity, index }: any) => {
   const Icon = activity.icon
@@ -14,26 +15,48 @@ const ActivityCard = ({ activity, index }: any) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -8, scale: 1.02 }}
       className="group h-full"
     >
       <Link href={activity.href}>
-        <Card className="h-full relative overflow-hidden group hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer flex flex-col">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <Card className="h-full relative overflow-hidden group hover:shadow-2xl hover:border-primary/50 transition-all duration-300 cursor-pointer flex flex-col">
+          {/* صورة الخلفية */}
+          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
+            <Image
+              src={activity.image}
+              alt={activity.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/90 to-background/95 group-hover:from-primary/20 transition-colors duration-300" />
 
           <CardHeader className="relative">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors mb-3">
-              <Icon className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-xl text-foreground">{activity.title}</CardTitle>
-            <CardDescription className="text-base mt-2">{activity.description}</CardDescription>
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+              transition={{ duration: 0.5 }}
+              className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg mb-4"
+            >
+              <Icon className="h-8 w-8 text-white" />
+            </motion.div>
+            <CardTitle className="text-2xl text-foreground font-bold mb-2">{activity.title}</CardTitle>
+            <CardDescription className="text-base mt-2 leading-relaxed">{activity.description}</CardDescription>
           </CardHeader>
 
           <CardContent className="relative mt-auto">
-            <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-              اذهب الآن
-              <ArrowRight className="h-4 w-4 mr-2" />
-            </div>
+            <motion.div
+              initial={{ x: 0 }}
+              whileHover={{ x: 5 }}
+              className="flex items-center text-base font-bold text-primary group-hover:text-primary/80 transition-colors"
+            >
+              <span>ابدأ الآن</span>
+              <motion.div
+                animate={{ x: [0, 5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <ArrowRight className="h-5 w-5 mr-2" />
+              </motion.div>
+            </motion.div>
           </CardContent>
         </Card>
       </Link>
@@ -51,40 +74,69 @@ export default function DashboardPage() {
       description: 'اقرأ مقالات توعوية واختبر معلوماتك',
       icon: BookOpen,
       href: '/articles',
+      image: '/images/OIP1.webp',
     },
     {
       title: t('games.title'),
       description: 'العب ألعاب تفاعلية وحقق نقاطاً',
       icon: Gamepad2,
       href: '/games',
+      image: '/images/hero-community.webp',
     },
     {
       title: t('polls.title'),
       description: 'شارك في الاستبيانات المجتمعية',
       icon: MessageSquare,
       href: '/polls',
+      image: '/images/OIP2.jpeg',
     },
     {
       title: t('common.leaderboard'),
       description: 'شاهد لوحة الصدارة والترتيبات',
       icon: Trophy,
       href: '/leaderboard',
+      image: '/images/OIP1.webp',
     },
   ]
 
   return (
     <div className="w-full min-h-screen space-y-8">
+      {/* Hero Section مع خلفية */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+        style={{
+          backgroundImage: 'url(/images/hero-community.webp)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
-        <h1 className="text-4xl font-bold text-foreground">
-          مرحباً بك، <span className="text-primary">{user?.name}</span>!
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          اختر من المميزات أدناه لبدء رحلتك التعليمية
-        </p>
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+
+        <div className="relative space-y-4">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="h-5 w-5 text-primary" />
+            </motion.div>
+            <span className="text-primary font-semibold">مرحباً بك في منصتك!</span>
+          </motion.div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            أهلاً، <span className="text-primary">{user?.name}</span>!
+          </h1>
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
+            اختر من المميزات أدناه لبدء رحلتك التعليمية والتفاعلية
+          </p>
+        </div>
       </motion.div>
 
       <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-4">

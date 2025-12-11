@@ -92,16 +92,13 @@ export function PublicNavbar() {
                   className="relative w-14 h-14 sm:w-16 sm:h-16"
                 >
                   <Image
-                    src="/images/logo.jpg"
+                    src="/images/logo.png"
                     alt="صوتنا يبني"
                     fill
                     className="object-contain"
                     priority
                   />
                 </motion.div>
-                <span className="hidden md:block text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  صوتنا يبني
-                </span>
               </Link>
 
               {/* Desktop Navigation - Center */}
@@ -221,7 +218,7 @@ export function PublicNavbar() {
                 <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
                   <div className="relative w-8 h-8">
                     <Image
-                      src="/images/logo.jpg"
+                      src="/images/logo.png"
                       alt="صوتنا يبني"
                       fill
                       className="object-contain"

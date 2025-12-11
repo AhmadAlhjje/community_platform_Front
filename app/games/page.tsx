@@ -9,7 +9,8 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy } from 'lucide-react'
+import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy, Gamepad2, Sparkles } from 'lucide-react'
+import Image from 'next/image'
 
 type TabType = 'puzzle' | 'crossword' | 'completed'
 
@@ -120,21 +121,31 @@ export default function GamesPage() {
 
   const GameCard = ({ game, index }: { game: Game; index: number }) => {
     const isPuzzle = game.type === 'puzzle'
+    const gameImage = isPuzzle ? '/images/hero-community.webp' : '/images/OIP2.jpeg'
 
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -8, scale: 1.02 }}
         className="h-full"
       >
-        <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+        <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:border-primary/50 cursor-pointer">
+          {/* صورة الخلفية */}
+          <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300">
+            <Image
+              src={gameImage}
+              alt={game.title}
+              fill
+              className="object-cover"
+            />
+          </div>
           <div className={`absolute inset-0 ${
             isPuzzle
-              ? 'bg-blue-500/5'
-              : 'bg-emerald-500/5'
-          } opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              ? 'bg-gradient-to-br from-blue-500/10 via-background/90 to-background/95'
+              : 'bg-gradient-to-br from-emerald-500/10 via-background/90 to-background/95'
+          } group-hover:via-background/85 transition-all duration-300`} />
 
           <CardHeader className="relative">
             <div className="flex items-start justify-between mb-4">
@@ -203,18 +214,42 @@ export default function GamesPage() {
   return (
     <div className="w-full min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Header */}
+        {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-6"
+          className="relative rounded-2xl overflow-hidden p-8 md:p-12"
+          style={{
+            backgroundImage: 'url(/images/hero-community.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            ألعاب تعليمية ممتعة
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            اختبر معلوماتك وتعلم بطريقة تفاعلية وحقق نقاطاً
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+
+          <div className="relative space-y-4">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+            >
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Gamepad2 className="h-5 w-5 text-primary" />
+              </motion.div>
+              <span className="text-primary font-semibold">ألعاب تفاعلية ممتعة!</span>
+            </motion.div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+              العب وتعلم واربح <span className="text-primary">نقاطاً!</span>
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
+              اختبر معلوماتك وتعلم بطريقة تفاعلية من خلال ألعاب البازل والكلمات المتقاطعة
+            </p>
+          </div>
         </motion.div>
 
         {/* Tabs */}
