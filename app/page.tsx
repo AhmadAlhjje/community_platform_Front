@@ -477,13 +477,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t bg-card/50 py-8">
-        <div className="container px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 منصة صوتنا يبني. جميع الحقوق محفوظة.</p>
-        </div>
-      </footer>
     </div>
   );
 }
