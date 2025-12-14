@@ -23,6 +23,7 @@ export default function CrosswordPage() {
   const [completed, setCompleted] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [startTime] = useState(Date.now())
+  const [helperLetters, setHelperLetters] = useState<{ [key: number]: string[] }>({})
   const { t } = useTranslation()
   const { toast } = useToast()
 
@@ -180,6 +181,10 @@ export default function CrosswordPage() {
       const builtGrid = buildGrid(processedContent.words)
       setGrid(builtGrid)
       setUserGrid(builtGrid.map(row => row.map(cell => cell === '#' ? '#' : '')))
+
+      // Generate helper letters for each word
+      const helpers = generateHelperLetters(processedContent.words)
+      setHelperLetters(helpers)
     } catch (error) {
       console.error('Error fetching game:', error)
       toast({
@@ -225,6 +230,39 @@ export default function CrosswordPage() {
     })
 
     return grid
+  }
+
+  const generateHelperLetters = (words: CrosswordWord[]): { [key: number]: string[] } => {
+    const helpers: { [key: number]: string[] } = {}
+
+    // أحرف عربية إضافية للاختيار منها
+    const arabicLetters = [
+      'ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ',
+      'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي', 'ة', 'ى', 'ء'
+    ]
+
+    words.forEach(word => {
+      // أحرف الإجابة
+      const answerLetters = word.answer.split('')
+
+      // عدد الأحرف الإضافية المطلوبة
+      const extraLettersNeeded = Math.max(0, 12 - answerLetters.length)
+
+      // أحرف إضافية عشوائية
+      const extraLetters: string[] = []
+      for (let i = 0; i < extraLettersNeeded; i++) {
+        const randomLetter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)]
+        extraLetters.push(randomLetter)
+      }
+
+      // دمج أحرف الإجابة مع الأحرف الإضافية وخلطها
+      const allLetters = [...answerLetters, ...extraLetters]
+      const shuffledLetters = allLetters.sort(() => Math.random() - 0.5)
+
+      helpers[word.number] = shuffledLetters
+    })
+
+    return helpers
   }
 
   const getWordNumberForCell = (row: number, col: number): number | null => {
@@ -580,6 +618,19 @@ export default function CrosswordPage() {
                         <p className="text-xs text-muted-foreground mt-1">
                           ({word.answer.length} أحرف)
                         </p>
+                        {/* Helper Letters */}
+                        {helperLetters[word.number] && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {helperLetters[word.number].map((letter, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded border border-blue-300 dark:border-blue-700"
+                              >
+                                {letter}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -613,6 +664,19 @@ export default function CrosswordPage() {
                         <p className="text-xs text-muted-foreground mt-1">
                           ({word.answer.length} أحرف)
                         </p>
+                        {/* Helper Letters */}
+                        {helperLetters[word.number] && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {helperLetters[word.number].map((letter, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded border border-indigo-300 dark:border-indigo-700"
+                              >
+                                {letter}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}
