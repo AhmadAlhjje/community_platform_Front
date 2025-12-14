@@ -216,47 +216,19 @@ export default function PuzzlePage() {
 
             fullCtx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE)
 
-            const isPieceContentful = (canvas: HTMLCanvasElement): boolean => {
-              const ctx = canvas.getContext('2d')
-              if (!ctx) return false
-              
-              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-              const data = imageData.data
-              
-              let nonTransparentPixels = 0
-              let totalBrightness = 0
-              
-              for (let i = 0; i < data.length; i += 16) {
-                const alpha = data[i + 3]
-                
-                if (alpha > 10) {
-                  nonTransparentPixels++
-                  const r = data[i]
-                  const g = data[i + 1]
-                  const b = data[i + 2]
-                  const brightness = (r + g + b) / 3
-                  totalBrightness += brightness
-                }
-              }
-              
-              const avgBrightness = nonTransparentPixels > 0 ? totalBrightness / nonTransparentPixels : 0
-              
-              return nonTransparentPixels > 10 && avgBrightness > 15
-            }
-
             for (let row = 0; row < rows; row++) {
               for (let col = 0; col < cols; col++) {
                 if (pieceId >= puzzleData.pieces) break
 
                 const x = Math.floor(col * pieceWidth)
                 const y = Math.floor(row * pieceHeight)
-                
-                const width = (col === cols - 1) 
-                  ? CANVAS_SIZE - x 
+
+                const width = (col === cols - 1)
+                  ? CANVAS_SIZE - x
                   : Math.floor(pieceWidth)
-                  
-                const height = (row === rows - 1) 
-                  ? CANVAS_SIZE - y 
+
+                const height = (row === rows - 1)
+                  ? CANVAS_SIZE - y
                   : Math.floor(pieceHeight)
 
                 const pieceCanvas = document.createElement('canvas')
@@ -272,31 +244,22 @@ export default function PuzzlePage() {
                   0, 0, width, height
                 )
 
-                const hasContent = isPieceContentful(pieceCanvas)
-                
-                if (hasContent) {
-                  // عكس ترتيب الأعمدة لتتوافق مع العرض RTL
-                  const rtlCol = (cols - 1) - col
-                  const correctSlotId = row * cols + rtlCol
-                  
-                  newPieces.push({
-                    id: pieceId,
-                    correctSlotId: correctSlotId,
-                    image: pieceCanvas.toDataURL('image/png', 1.0),
-                  })
-                  
-                  console.log(`✓ القطعة ${pieceId} تحتوي على محتوى - تمت الإضافة`, {
-                    col: col,
-                    rtlCol: rtlCol,
-                    row: row,
-                    correctSlotId: correctSlotId
-                  })
-                } else {
-                  console.log(`✗ القطعة ${pieceId} فارغة - تم تجاهلها`, {
-                    col: col,
-                    row: row
-                  })
-                }
+                // عكس ترتيب الأعمدة لتتوافق مع العرض RTL
+                const rtlCol = (cols - 1) - col
+                const correctSlotId = row * cols + rtlCol
+
+                newPieces.push({
+                  id: pieceId,
+                  correctSlotId: correctSlotId,
+                  image: pieceCanvas.toDataURL('image/png', 1.0),
+                })
+
+                console.log(`✓ القطعة ${pieceId} - تمت الإضافة`, {
+                  col: col,
+                  rtlCol: rtlCol,
+                  row: row,
+                  correctSlotId: correctSlotId
+                })
 
                 pieceId++
               }
@@ -304,14 +267,18 @@ export default function PuzzlePage() {
 
             const shuffled = [...newPieces].sort(() => Math.random() - 0.5)
             setPieces(shuffled)
-            
-            setSlots(Array(shuffled.length).fill(null))
-            
+
+            setSlots(Array(puzzleData.pieces).fill(null))
+
             console.log(`=== ملخص القطع ===`)
-            console.log(`إجمالي الخانات: ${puzzleData.pieces}`)
-            console.log(`القطع ذات المحتوى: ${shuffled.length}`)
+            console.log(`عدد القطع المطلوب: ${puzzleData.pieces}`)
+            console.log(`عدد القطع المُنشأة: ${newPieces.length}`)
             console.log(`الشبكة: ${cols}x${rows}`)
             console.log(`حجم القطعة: ${Math.floor(pieceWidth)}x${Math.floor(pieceHeight)}`)
+
+            if (newPieces.length !== puzzleData.pieces) {
+              console.warn(`⚠️ عدد القطع المُنشأة (${newPieces.length}) لا يطابق العدد المطلوب (${puzzleData.pieces})`)
+            }
             
             resolve()
           } catch (error) {
