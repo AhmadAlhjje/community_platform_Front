@@ -165,12 +165,19 @@ export interface SessionPoll {
   id: string
   sessionId: string
   title: string
-  endDate: string
+  description: string | null
+  expiryDate: string | null
   isActive: boolean
   pointsReward: number
+  adminId: string
   createdAt: string
   updatedAt: string
+  admin: {
+    id: string
+    name: string
+  }
   options: PollOption[]
+  totalVotes: number
 }
 
 export interface SessionPollResponse {

@@ -9,7 +9,7 @@ interface Poll {
   id: string
   title: string
   createdAt: string
-  endDate?: string | null
+  expiryDate?: string | null
 }
 
 export function ActivePollsTicker() {
@@ -26,11 +26,11 @@ export function ActivePollsTicker() {
           const now = new Date()
           const activePoll = data.data.find((poll: Poll) => {
             // إذا لم يكن هناك تاريخ انتهاء، فالاستبيان نشط
-            if (!poll.endDate) return true
+            if (!poll.expiryDate) return true
 
             // التحقق من أن تاريخ الانتهاء لم يمر بعد
-            const endDate = new Date(poll.endDate)
-            return endDate > now
+            const expiryDate = new Date(poll.expiryDate)
+            return expiryDate > now
           })
 
           if (activePoll) {

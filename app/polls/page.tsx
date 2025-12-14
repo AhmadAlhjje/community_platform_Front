@@ -26,6 +26,7 @@ interface Poll {
   description: string | null
   adminId: string
   pointsReward: number
+  expiryDate: string | null
   createdAt: string
   updatedAt: string
   admin: {
@@ -123,20 +124,38 @@ export default function PollsPage() {
       const response = await apiClient.get<PollsResponse>('/api/polls')
 
       if (response.success && response.data && response.data.length > 0) {
-        // Get the latest poll (most recently created)
-        const latest = response.data.reduce((prev, current) => {
-          return new Date(current.createdAt) > new Date(prev.createdAt) ? current : prev
+        const now = new Date().getTime()
+
+        // Filter active polls (not expired)
+        const activePolls = response.data.filter((poll: Poll) => {
+          if (!poll.expiryDate) return true // No expiry date means always active
+          return new Date(poll.expiryDate).getTime() > now
         })
 
-        setLatestPoll(latest)
+        if (activePolls.length > 0) {
+          // Get the latest active poll (most recently created)
+          const latest = activePolls.reduce((prev, current) => {
+            return new Date(current.createdAt) > new Date(prev.createdAt) ? current : prev
+          })
 
-        // Parse poll end time (assuming poll duration is 24 hours)
-        const endTime = new Date(latest.createdAt).getTime() + (24 * 60 * 60 * 1000) // 24 hours
-        setPollEndTime(endTime)
+          setLatestPoll(latest)
 
-        // Check if poll has already ended
-        const now = new Date().getTime()
-        if (endTime <= now) {
+          // Parse poll end time from expiryDate or default to 24 hours
+          let endTime: number
+          if (latest.expiryDate) {
+            endTime = new Date(latest.expiryDate).getTime()
+          } else {
+            endTime = new Date(latest.createdAt).getTime() + (24 * 60 * 60 * 1000) // 24 hours default
+          }
+          setPollEndTime(endTime)
+
+          // Check if poll has already ended
+          if (endTime <= now) {
+            setPollEnded(true)
+            fetchLatestDiscussionAfterPoll()
+          }
+        } else {
+          // No active polls, fetch discussions
           setPollEnded(true)
           fetchLatestDiscussionAfterPoll()
         }
