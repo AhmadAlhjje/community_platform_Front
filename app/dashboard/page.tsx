@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ActivePollsTicker } from '@/components/active-polls-ticker'
 import { BookOpen, Gamepad2, MessageSquare, Trophy, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -101,6 +102,9 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full min-h-screen space-y-8">
+      {/* Active Polls Ticker */}
+      <ActivePollsTicker />
+
       {/* Hero Section مع خلفية */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

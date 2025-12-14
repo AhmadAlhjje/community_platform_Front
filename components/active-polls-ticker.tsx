@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/use-auth'
 import { MessageSquare, TrendingUp, Sparkles, ChevronLeft } from 'lucide-react'
 
 interface Poll {
@@ -13,6 +14,7 @@ interface Poll {
 }
 
 export function ActivePollsTicker() {
+  const { user } = useAuth()
   const [latestPoll, setLatestPoll] = useState<Poll | null>(null)
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export function ActivePollsTicker() {
 
               {/* محتوى الاستبيان */}
               <Link
-                href="/polls"
+                href={user ? "/polls" : "/auth/login"}
                 className="group flex items-center gap-3 px-8 py-3 bg-card/90 backdrop-blur-sm rounded-full border-2 border-primary/30 hover:border-primary/60 transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
                 <motion.div
