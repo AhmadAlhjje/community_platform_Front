@@ -46,7 +46,6 @@ export default function LoginPage() {
         </Link>
         <div className="flex gap-2">
           <ThemeSwitcher />
-          <LanguageSwitcher />
         </div>
       </div>
 

@@ -145,7 +145,6 @@ export function PublicNavbar() {
               {/* Theme & Language Switchers - Desktop */}
               <div className="hidden sm:flex items-center gap-1 border-l border-border pl-2 sm:pl-3">
                 <ThemeSwitcher />
-                <LanguageSwitcher />
               </div>
 
               {/* Logout Button - Desktop (Only for logged in users) */}
@@ -337,7 +336,6 @@ export function PublicNavbar() {
                 <div className="flex items-center gap-2 justify-center">
                   <ThemeSwitcher />
                   <div className="w-px h-5 bg-border" />
-                  <LanguageSwitcher />
                 </div>
 
                 {user ? (
