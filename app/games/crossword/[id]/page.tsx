@@ -20,10 +20,12 @@ export default function CrosswordPage() {
   const [grid, setGrid] = useState<string[][]>([])
   const [userGrid, setUserGrid] = useState<string[][]>([])
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null)
+  const [selectedWord, setSelectedWord] = useState<number | null>(null)
   const [completed, setCompleted] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [startTime] = useState(Date.now())
   const [helperLetters, setHelperLetters] = useState<{ [key: number]: string[] }>({})
+  const [usedLetters, setUsedLetters] = useState<{ [key: number]: string[] }>({})
   const { t } = useTranslation()
   const { toast } = useToast()
 
@@ -276,42 +278,159 @@ export default function CrosswordPage() {
     return word ? word.number : null
   }
 
-  const handleCellChange = (row: number, col: number, value: string) => {
+  const handleCellClear = (row: number, col: number) => {
     if (grid[row][col] === '#' || completed) return
 
-    const arabicOnly = value.replace(/[^ء-ي]/g, '')
+    const oldValue = userGrid[row][col]
+
+    // If there's a letter in the cell, remove it
+    if (oldValue) {
+      // Find which word this cell belongs to
+      if (crosswordData?.words) {
+        const word = crosswordData.words.find(w => {
+          if (w.direction === 'across') {
+            return w.position.row === row &&
+                   col >= w.position.col &&
+                   col < w.position.col + w.answer.length
+          } else {
+            return w.position.col === col &&
+                   row >= w.position.row &&
+                   row < w.position.row + w.answer.length
+          }
+        })
+
+        if (word) {
+          // Remove letter from used letters
+          setUsedLetters(prev => {
+            const used = prev[word.number] || []
+            const letterIndex = used.indexOf(oldValue)
+            if (letterIndex > -1) {
+              const newUsed = [...used]
+              newUsed.splice(letterIndex, 1)
+              return {
+                ...prev,
+                [word.number]: newUsed
+              }
+            }
+            return prev
+          })
+        }
+      }
+
+      // Clear the cell
+      const newGrid = [...userGrid]
+      newGrid[row][col] = ''
+      setUserGrid(newGrid)
+    }
+  }
+
+  const handleLetterClick = (letter: string, wordNumber: number) => {
+    if (!selectedCell || completed) return
+
+    const row = selectedCell.row
+    const col = selectedCell.col
+
+    if (grid[row][col] === '#') return
+
+    // Check if the selected cell belongs to the word that this letter is for
+    if (!crosswordData?.words) return
+
+    const selectedCellWord = crosswordData.words.find(w => {
+      if (w.direction === 'across') {
+        return w.position.row === row &&
+               col >= w.position.col &&
+               col < w.position.col + w.answer.length
+      } else {
+        return w.position.col === col &&
+               row >= w.position.row &&
+               row < w.position.row + w.answer.length
+      }
+    })
+
+    // If the selected cell doesn't belong to this word's clue, show error
+    if (!selectedCellWord || selectedCellWord.number !== wordNumber) {
+      toast({
+        title: 'تنبيه',
+        description: 'يجب اختيار خانة من نفس الكلمة',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // First, clear the current cell if it has a letter
+    const oldValue = userGrid[row][col]
+    if (oldValue) {
+      handleCellClear(row, col)
+    }
+
     const newGrid = [...userGrid]
-    newGrid[row][col] = arabicOnly.slice(-1)
+    newGrid[row][col] = letter
     setUserGrid(newGrid)
 
-    // Auto-move to next empty cell when a character is entered
-    if (arabicOnly) {
-      // Use setTimeout to ensure state is updated before moving
-      setTimeout(() => {
-        moveToNextEmptyCell(row, col)
-      }, 0)
+    // Mark letter as used for this word
+    setUsedLetters(prev => ({
+      ...prev,
+      [wordNumber]: [...(prev[wordNumber] || []), letter]
+    }))
+
+    // Auto-move to next empty cell
+    setTimeout(() => {
+      moveToNextEmptyCell(row, col)
+    }, 0)
+  }
+
+  const handleCellClick = (row: number, col: number) => {
+    if (grid[row][col] === '#' || completed) return
+
+    // If clicking on an already selected cell with a letter, clear it
+    if (selectedCell?.row === row && selectedCell?.col === col && userGrid[row][col]) {
+      handleCellClear(row, col)
+      return
+    }
+
+    setSelectedCell({ row, col })
+
+    // Find which word this cell belongs to
+    if (!crosswordData?.words) return
+
+    const word = crosswordData.words.find(w => {
+      if (w.direction === 'across') {
+        return w.position.row === row &&
+               col >= w.position.col &&
+               col < w.position.col + w.answer.length
+      } else {
+        return w.position.col === col &&
+               row >= w.position.row &&
+               row < w.position.row + w.answer.length
+      }
+    })
+
+    if (word) {
+      setSelectedWord(word.number)
     }
   }
 
   const moveToNextEmptyCell = (currentRow: number, currentCol: number) => {
-    // Try to find the next empty cell in the same row (right direction)
-    for (let col = currentCol + 1; col < grid[currentRow].length; col++) {
-      if (grid[currentRow][col] !== '#') {
-        setSelectedCell({ row: currentRow, col })
-        // Focus the input element
-        const input = document.querySelector(`input[data-row="${currentRow}"][data-col="${col}"]`) as HTMLInputElement
-        if (input) input.focus()
-        return
-      }
-    }
+    if (!crosswordData?.words || !selectedWord) return
 
-    // If no empty cell in the same row, try to find in subsequent rows
-    for (let row = currentRow + 1; row < grid.length; row++) {
-      for (let col = 0; col < grid[row].length; col++) {
-        if (grid[row][col] !== '#') {
-          setSelectedCell({ row, col })
-          const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`) as HTMLInputElement
-          if (input) input.focus()
+    // Find the current word
+    const currentWord = crosswordData.words.find(w => w.number === selectedWord)
+    if (!currentWord) return
+
+    // Find next empty cell in the same word
+    if (currentWord.direction === 'across') {
+      // Move horizontally within the word
+      for (let col = currentCol + 1; col < currentWord.position.col + currentWord.answer.length; col++) {
+        if (!userGrid[currentRow][col]) {
+          setSelectedCell({ row: currentRow, col })
+          return
+        }
+      }
+    } else {
+      // Move vertically within the word
+      for (let row = currentRow + 1; row < currentWord.position.row + currentWord.answer.length; row++) {
+        if (!userGrid[row][currentCol]) {
+          setSelectedCell({ row, col: currentCol })
           return
         }
       }
@@ -351,6 +470,26 @@ export default function CrosswordPage() {
   const handleReset = () => {
     setUserGrid(grid.map(row => row.map(cell => cell === '#' ? '#' : '')))
     setSelectedCell(null)
+    setUsedLetters({})
+  }
+
+  const isLetterUsed = (letter: string, wordNumber: number, index: number): boolean => {
+    const allLetters = helperLetters[wordNumber] || []
+    const used = usedLetters[wordNumber] || []
+
+    // Count how many times this letter appears before this index
+    let countBefore = 0
+    for (let i = 0; i < index; i++) {
+      if (allLetters[i] === letter) {
+        countBefore++
+      }
+    }
+
+    // Count how many times this letter has been used
+    const usedCount = used.filter(u => u === letter).length
+
+    // This specific instance is used if we've used more letters than appear before it
+    return usedCount > countBefore
   }
 
   const handleComplete = async () => {
@@ -409,24 +548,24 @@ export default function CrosswordPage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           >
             <motion.div
               initial={{ y: 50 }}
               animate={{ y: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden relative"
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden relative border-4 border-green-500"
             >
               {/* Close Button */}
               <button
                 onClick={() => setShowSuccess(false)}
-                className="absolute top-4 left-4 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors"
+                className="absolute top-4 left-4 z-10 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors"
                 aria-label="إغلاق"
               >
-                <X className="h-6 w-6 text-white" />
+                <X className="h-6 w-6 text-gray-700 dark:text-gray-200" />
               </button>
 
-              {/* Header with gradient */}
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-500 p-8 text-center">
+              {/* Header */}
+              <div className="bg-green-500 p-8 text-center">
                 <motion.div
                   animate={{
                     scale: [1, 1.2, 1],
@@ -438,11 +577,11 @@ export default function CrosswordPage() {
                 <h2 className="text-3xl font-bold text-white mt-4">
                   أحسنت!
                 </h2>
-                <p className="text-xl text-white/90 mt-2">
+                <p className="text-xl text-white mt-2">
                   لقد أكملت اللعبة بنجاح
                 </p>
-                <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 inline-block mt-4">
-                  <p className="text-2xl font-bold text-white">
+                <div className="bg-white rounded-xl px-6 py-3 inline-block mt-4">
+                  <p className="text-2xl font-bold text-green-600">
                     +{game.pointsReward} نقطة
                   </p>
                 </div>
@@ -450,16 +589,16 @@ export default function CrosswordPage() {
 
               {/* Educational Message */}
               <div className="p-8">
-                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-700 rounded-xl p-6">
                   <div className="flex items-start gap-4">
-                    <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-full">
-                      <Lightbulb className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                    <div className="bg-amber-400 p-3 rounded-xl">
+                      <Lightbulb className="h-8 w-8 text-white" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-amber-900 dark:text-amber-100 mb-3">
-                        💡 الرسالة التعليمية
+                        الرسالة التعليمية
                       </h3>
-                      <p className="text-lg text-amber-800 dark:text-amber-200 leading-relaxed">
+                      <p className="text-lg text-amber-900 dark:text-amber-200 leading-relaxed">
                         {game.educationalMessage}
                       </p>
                     </div>
@@ -468,7 +607,7 @@ export default function CrosswordPage() {
 
                 <Button
                   onClick={() => router.push('/games')}
-                  className="w-full mt-6 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-6 text-lg"
+                  className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg shadow-md"
                   size="lg"
                 >
                   العودة إلى الألعاب
@@ -480,26 +619,28 @@ export default function CrosswordPage() {
       </AnimatePresence>
 
       {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
+      <Card className="border-2 border-blue-200 dark:border-blue-800">
+        <CardHeader className="bg-blue-50 dark:bg-blue-950/50">
+          <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <CardTitle className="text-2xl mb-2">{game.title}</CardTitle>
+              <CardTitle className="text-3xl mb-3 text-blue-900 dark:text-blue-100">{game.title}</CardTitle>
               {!completed && (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-gray-700 dark:text-gray-300 text-base">
                   أكمل جميع الكلمات لمعرفة الرسالة التعليمية
                 </p>
               )}
               {completed && (
-                <p className="text-muted-foreground flex items-center gap-2 mt-2">
-                  <Lightbulb className="h-4 w-4 text-amber-500" />
-                  {game.educationalMessage}
-                </p>
+                <div className="flex items-center gap-2 mt-2 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg border-2 border-amber-400 dark:border-amber-700">
+                  <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <p className="text-amber-900 dark:text-amber-200 font-medium">
+                    {game.educationalMessage}
+                  </p>
+                </div>
               )}
             </div>
-            <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-full">
-              <Award className="h-4 w-4" />
-              <span className="font-bold">{game.pointsReward} نقطة</span>
+            <div className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md">
+              <Award className="h-5 w-5" />
+              <span className="font-bold text-lg">{game.pointsReward} نقطة</span>
             </div>
           </div>
         </CardHeader>
@@ -507,12 +648,12 @@ export default function CrosswordPage() {
 
       <div className="grid lg:grid-cols-[auto_1fr] gap-6">
         {/* Crossword Grid */}
-        <Card>
-          <CardHeader>
-            <CardTitle>الشبكة</CardTitle>
+        <Card className="border-2 border-blue-200 dark:border-blue-800">
+          <CardHeader className="bg-blue-50 dark:bg-blue-950/50">
+            <CardTitle className="text-xl text-blue-900 dark:text-blue-100">الشبكة</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="inline-block bg-white dark:bg-gray-900 p-4 rounded-lg">
+          <CardContent className="pt-6">
+            <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl shadow-inner">
               {grid.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                   {row.map((cell, colIndex) => {
@@ -530,26 +671,27 @@ export default function CrosswordPage() {
                         <input
                           type="text"
                           value={isBlocked ? '' : userValue}
-                          onChange={(e) => !isBlocked && handleCellChange(rowIndex, colIndex, e.target.value)}
+                          readOnly
+                          onClick={() => handleCellClick(rowIndex, colIndex)}
                           onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
                           disabled={isBlocked || completed}
-                          maxLength={1}
                           data-row={rowIndex}
                           data-col={colIndex}
                           className={`
-                            w-10 h-10 sm:w-12 sm:h-12 text-center text-base sm:text-lg font-bold border-2 uppercase
-                            transition-all duration-200
+                            w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2
+                            transition-all duration-200 rounded-sm
                             ${isBlocked
-                              ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed border-gray-400 dark:border-gray-600'
-                              : 'bg-white dark:bg-gray-800 border-gray-400 dark:border-gray-600'
+                              ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
+                              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
                             }
-                            ${isSelected && !isBlocked ? 'border-blue-500 ring-2 ring-blue-300 dark:ring-blue-700 z-10' : ''}
+                            ${isSelected && !isBlocked ? 'border-blue-500 ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
                             ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
-                            ${!isBlocked && !completed ? 'hover:border-blue-400 focus:outline-none' : ''}
+                            ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
+                            focus:outline-none
                           `}
                         />
                         {wordNumber && (
-                          <span className="absolute top-0.5 left-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 pointer-events-none">
+                          <span className="absolute top-1 left-1 text-xs font-bold text-blue-600 dark:text-blue-400 pointer-events-none bg-white dark:bg-gray-800 px-1 rounded">
                             {wordNumber}
                           </span>
                         )}
@@ -559,7 +701,7 @@ export default function CrosswordPage() {
                             animate={{ scale: 1 }}
                             className="absolute inset-0 flex items-center justify-center pointer-events-none"
                           >
-                            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+                            <CheckCircle className="h-6 w-6 text-green-600" />
                           </motion.div>
                         )}
                       </div>
@@ -569,21 +711,24 @@ export default function CrosswordPage() {
               ))}
             </div>
 
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3 mt-6">
               <Button
-                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
                 onClick={handleCheckAnswers}
                 disabled={completed}
+                size="lg"
               >
-                <CheckCircle className="h-4 w-4 ml-2" />
+                <CheckCircle className="h-5 w-5 ml-2" />
                 تحقق من الإجابات
               </Button>
               <Button
                 variant="outline"
+                className="border-2 hover:bg-gray-100 dark:hover:bg-gray-800"
                 onClick={handleReset}
                 disabled={completed}
+                size="lg"
               >
-                <RotateCcw className="h-4 w-4 ml-2" />
+                <RotateCcw className="h-5 w-5 ml-2" />
                 إعادة
               </Button>
             </div>
@@ -593,11 +738,14 @@ export default function CrosswordPage() {
         {/* Clues */}
         <div className="space-y-4">
           {/* Across Clues */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">أفقي →</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="bg-blue-50 dark:bg-blue-950/50">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="text-blue-600 dark:text-blue-400">→</span>
+                أفقي
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-3">
                 {crosswordData?.words
                   ?.filter(word => word.direction === 'across')
@@ -608,30 +756,54 @@ export default function CrosswordPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800"
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        selectedWord === word.number
+                          ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-500 shadow-md'
+                          : 'bg-white dark:bg-gray-800/50 border-blue-200 dark:border-blue-900'
+                      }`}
                     >
-                      <span className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        {word.number}
-                      </span>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{word.question}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          ({word.answer.length} أحرف)
-                        </p>
-                        {/* Helper Letters */}
-                        {helperLetters[word.number] && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {helperLetters[word.number].map((letter, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded border border-blue-300 dark:border-blue-700"
-                              >
-                                {letter}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                      <div className="flex gap-3 mb-3">
+                        <span className="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-sm">
+                          {word.number}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{word.question}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {word.answer.length} أحرف
+                          </p>
+                        </div>
                       </div>
+                      {/* Helper Letters */}
+                      {helperLetters[word.number] && (
+                        <div className="pt-3 border-t-2 border-blue-200 dark:border-blue-800">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-medium">
+                            {selectedWord === word.number ? 'اضغط على الحرف لإضافته:' : 'الأحرف المساعدة:'}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {helperLetters[word.number].map((letter, idx) => {
+                              const isUsed = isLetterUsed(letter, word.number, idx)
+                              return (
+                                <motion.button
+                                  key={`${letter}-${idx}`}
+                                  onClick={() => !isUsed && handleLetterClick(letter, word.number)}
+                                  disabled={completed || isUsed}
+                                  whileHover={!isUsed ? { scale: 1.1 } : {}}
+                                  whileTap={!isUsed ? { scale: 0.95 } : {}}
+                                  className={`w-10 h-10 text-lg font-bold rounded-lg shadow-md transition-all ${
+                                    isUsed
+                                      ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed line-through'
+                                      : selectedWord === word.number
+                                        ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-lg active:bg-blue-800 cursor-pointer'
+                                        : 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60 cursor-pointer'
+                                  }`}
+                                >
+                                  {letter}
+                                </motion.button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
               </div>
@@ -639,11 +811,14 @@ export default function CrosswordPage() {
           </Card>
 
           {/* Down Clues */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">عمودي ↓</CardTitle>
+          <Card className="border-2">
+            <CardHeader className="bg-indigo-50 dark:bg-indigo-950/50">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <span className="text-indigo-600 dark:text-indigo-400">↓</span>
+                عمودي
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-3">
                 {crosswordData?.words
                   ?.filter(word => word.direction === 'down')
@@ -654,30 +829,54 @@ export default function CrosswordPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800"
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        selectedWord === word.number
+                          ? 'bg-indigo-100 dark:bg-indigo-900/30 border-indigo-500 shadow-md'
+                          : 'bg-white dark:bg-gray-800/50 border-indigo-200 dark:border-indigo-900'
+                      }`}
                     >
-                      <span className="bg-indigo-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        {word.number}
-                      </span>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{word.question}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          ({word.answer.length} أحرف)
-                        </p>
-                        {/* Helper Letters */}
-                        {helperLetters[word.number] && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {helperLetters[word.number].map((letter, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded border border-indigo-300 dark:border-indigo-700"
-                              >
-                                {letter}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                      <div className="flex gap-3 mb-3">
+                        <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-sm">
+                          {word.number}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{word.question}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {word.answer.length} أحرف
+                          </p>
+                        </div>
                       </div>
+                      {/* Helper Letters */}
+                      {helperLetters[word.number] && (
+                        <div className="pt-3 border-t-2 border-indigo-200 dark:border-indigo-800">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 font-medium">
+                            {selectedWord === word.number ? 'اضغط على الحرف لإضافته:' : 'الأحرف المساعدة:'}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {helperLetters[word.number].map((letter, idx) => {
+                              const isUsed = isLetterUsed(letter, word.number, idx)
+                              return (
+                                <motion.button
+                                  key={`${letter}-${idx}`}
+                                  onClick={() => !isUsed && handleLetterClick(letter, word.number)}
+                                  disabled={completed || isUsed}
+                                  whileHover={!isUsed ? { scale: 1.1 } : {}}
+                                  whileTap={!isUsed ? { scale: 0.95 } : {}}
+                                  className={`w-10 h-10 text-lg font-bold rounded-lg shadow-md transition-all ${
+                                    isUsed
+                                      ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed line-through'
+                                      : selectedWord === word.number
+                                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg active:bg-indigo-800 cursor-pointer'
+                                        : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 cursor-pointer'
+                                  }`}
+                                >
+                                  {letter}
+                                </motion.button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
               </div>
@@ -692,26 +891,37 @@ export default function CrosswordPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-900/20">
+          <Card className="border-4 border-green-500 bg-green-50 dark:bg-green-900/20">
             <CardContent className="pt-6 text-center space-y-4">
-              <Trophy className="h-16 w-16 text-green-600 mx-auto" />
-              <h3 className="text-2xl font-bold">تم إكمال اللعبة!</h3>
-              <p className="text-muted-foreground">
+              <motion.div
+                animate={{
+                  rotate: [0, 10, -10, 10, 0],
+                }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+              >
+                <Trophy className="h-20 w-20 text-green-600 mx-auto" />
+              </motion.div>
+              <h3 className="text-3xl font-bold text-green-700 dark:text-green-500">تم إكمال اللعبة!</h3>
+              <p className="text-lg text-gray-700 dark:text-gray-300">
                 لقد حللت جميع الكلمات بنجاح
               </p>
-              <p className="text-lg font-bold text-green-600">
-                +{game.pointsReward} نقطة
-              </p>
+              <div className="bg-green-600 text-white px-6 py-3 rounded-xl inline-block">
+                <p className="text-2xl font-bold">
+                  +{game.pointsReward} نقطة
+                </p>
+              </div>
 
               {/* Educational Message */}
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg mt-4">
-                <div className="flex items-start gap-3">
-                  <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-700 p-6 rounded-xl mt-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-amber-400 p-3 rounded-xl">
+                    <Lightbulb className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right flex-1">
+                    <p className="text-lg font-bold text-amber-900 dark:text-amber-100 mb-2">
                       الرسالة التعليمية
                     </p>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                    <p className="text-base text-amber-900 dark:text-amber-200 leading-relaxed">
                       {game.educationalMessage}
                     </p>
                   </div>
