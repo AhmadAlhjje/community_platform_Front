@@ -8,7 +8,7 @@ import { Category, Article } from '@/types/api'
 import { useTranslation } from '@/hooks/use-translation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpen, CheckCircle2, Sparkles, ArrowRight } from 'lucide-react'
+import { BookOpen, CheckCircle2, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 
 export default function ArticlesPage() {
@@ -72,19 +72,14 @@ export default function ArticlesPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 rounded-full border-2 border-foreground/20 shadow-lg backdrop-blur-sm"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="h-5 w-5 text-primary" />
-            </motion.div>
-            <span className="text-primary font-semibold">مقالات توعوية قيّمة!</span>
+            <BookOpen className="h-5 w-5 text-foreground drop-shadow-md" />
+            <span className="text-foreground font-bold drop-shadow-md">مقالات توعوية قيّمة!</span>
           </motion.div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            اقرأ وتعلم واختبر <span className="text-primary">معلوماتك!</span>
+            اقرأ وتعلم واختبر <span className="text-primary drop-shadow-md font-extrabold">معلوماتك!</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
             مقالات توعوية شاملة مع أسئلة تفاعلية لاختبار فهمك
@@ -151,15 +146,15 @@ export default function ArticlesPage() {
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-xs font-medium"
+                        className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-xs font-medium shadow-sm"
                       >
                         <CheckCircle2 className="h-3 w-3" />
                         مقروءة
                       </motion.div>
                     )}
                   </div>
-                  <CardTitle className="line-clamp-2">{article.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">
+                  <CardTitle className="line-clamp-2 drop-shadow-sm text-foreground font-bold">{article.title}</CardTitle>
+                  <CardDescription className="line-clamp-3 text-foreground/80 font-medium drop-shadow-sm">
                     {article.content.substring(0, 150)}...
                   </CardDescription>
                 </CardHeader>

@@ -154,7 +154,7 @@ export default function GamesPage() {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-xs font-medium"
+                  className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-xs font-medium shadow-sm"
                 >
                   <CheckCircle2 className="h-3 w-3" />
                   مكتملة
@@ -162,11 +162,11 @@ export default function GamesPage() {
               )}
             </div>
 
-            <CardTitle className="text-lg line-clamp-2 text-foreground">
+            <CardTitle className="text-lg line-clamp-2 text-foreground font-bold drop-shadow-sm">
               {game.title}
             </CardTitle>
 
-            <CardDescription className="line-clamp-2 text-sm mt-2">
+            <CardDescription className="line-clamp-2 text-sm mt-2 text-foreground/80 font-medium drop-shadow-sm">
               {game.educationalMessage}
             </CardDescription>
 
@@ -232,19 +232,14 @@ export default function GamesPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 rounded-full border-2 border-foreground/20 shadow-lg backdrop-blur-sm"
             >
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Gamepad2 className="h-5 w-5 text-primary" />
-              </motion.div>
-              <span className="text-primary font-semibold">ألعاب تفاعلية ممتعة!</span>
+              <Gamepad2 className="h-5 w-5 text-foreground drop-shadow-md" />
+              <span className="text-foreground font-bold drop-shadow-md">ألعاب تفاعلية ممتعة!</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              العب وتعلم واربح <span className="text-primary">نقاطاً!</span>
+              العب وتعلم واربح <span className="text-primary drop-shadow-md font-extrabold">نقاطاً!</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
               اختبر معلوماتك وتعلم بطريقة تفاعلية من خلال ألعاب البازل والكلمات المتقاطعة

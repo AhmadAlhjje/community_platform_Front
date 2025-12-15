@@ -40,8 +40,8 @@ const ActivityCard = ({ activity, index }: any) => {
             >
               <Icon className="h-8 w-8 text-white" />
             </motion.div>
-            <CardTitle className="text-2xl text-foreground font-bold mb-2">{activity.title}</CardTitle>
-            <CardDescription className="text-base mt-2 leading-relaxed">{activity.description}</CardDescription>
+            <CardTitle className="text-2xl text-foreground font-bold mb-2 drop-shadow-sm">{activity.title}</CardTitle>
+            <CardDescription className="text-base mt-2 leading-relaxed text-foreground/90 font-medium drop-shadow-sm">{activity.description}</CardDescription>
           </CardHeader>
 
           <CardContent className="relative mt-auto">
@@ -123,19 +123,14 @@ export default function DashboardPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 rounded-full border-2 border-foreground/20 shadow-lg backdrop-blur-sm"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="h-5 w-5 text-primary" />
-            </motion.div>
-            <span className="text-primary font-semibold">مرحباً بك في منصتك!</span>
+            <Sparkles className="h-5 w-5 text-foreground drop-shadow-md" />
+            <span className="text-foreground font-bold drop-shadow-md">مرحباً بك في منصتك!</span>
           </motion.div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            أهلاً، <span className="text-primary">{user?.name}</span>!
+            أهلاً، <span className="text-primary drop-shadow-md font-extrabold">{user?.name}</span>!
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
             اختر من المميزات أدناه لبدء رحلتك التعليمية والتفاعلية

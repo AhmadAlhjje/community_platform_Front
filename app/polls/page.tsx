@@ -285,7 +285,7 @@ export default function PollsPage() {
             backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/55 to-background/60" />
 
           <div className="relative space-y-4">
             <motion.div
@@ -501,15 +501,10 @@ export default function PollsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 rounded-full border-2 border-foreground/20 shadow-lg backdrop-blur-sm"
             >
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <MessageSquare className="h-5 w-5 text-primary" />
-              </motion.div>
-              <span className="text-primary font-semibold">شارك برأيك!</span>
+              <MessageSquare className="h-5 w-5 text-foreground drop-shadow-md" />
+              <span className="text-foreground font-bold drop-shadow-md">شارك برأيك!</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-foreground">
@@ -674,27 +669,22 @@ export default function PollsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-2xl overflow-hidden p-8 md:p-12"
         style={{
-          backgroundImage: 'url(/images/OIP2.jpeg)',
+          backgroundImage: 'url(/images/استبيان.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/55 to-background/60" />
 
         <div className="relative space-y-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 rounded-full border-2 border-foreground/20 shadow-lg backdrop-blur-sm"
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <MessageSquare className="h-5 w-5 text-primary" />
-            </motion.div>
-            <span className="text-primary font-semibold">الاستبيانات المجتمعية</span>
+            <MessageSquare className="h-5 w-5 text-foreground drop-shadow-md" />
+            <span className="text-foreground font-bold drop-shadow-md">الاستبيانات المجتمعية</span>
           </motion.div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
