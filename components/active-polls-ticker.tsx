@@ -23,20 +23,34 @@ export function ActivePollsTicker() {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/polls`)
         const data = await response.json()
+
         if (data.success && data.data && data.data.length > 0) {
           // البحث عن أول استبيان لم ينتهِ بعد
           const now = new Date()
+
           const activePoll = data.data.find((poll: Poll) => {
-            // إذا لم يكن هناك تاريخ انتهاء، فالاستبيان نشط
-            if (!poll.expiryDate) return true
+            // إذا لم يكن هناك تاريخ انتهاء أو كان null، فالاستبيان نشط
+            if (!poll.expiryDate || poll.expiryDate === null) {
+              return true
+            }
 
             // التحقق من أن تاريخ الانتهاء لم يمر بعد
             const expiryDate = new Date(poll.expiryDate)
+            const isValid = !isNaN(expiryDate.getTime()) // التأكد من أن التاريخ صالح
+
+            if (!isValid) {
+              console.warn('Invalid expiryDate format:', poll.expiryDate)
+              return true // إذا كان التاريخ غير صالح، نعتبر الاستبيان نشط
+            }
+
             return expiryDate > now
           })
 
           if (activePoll) {
             setLatestPoll(activePoll)
+          } else {
+            // إذا لم يتم العثور على أي استبيان نشط، لا نعرض شيء
+            setLatestPoll(null)
           }
         }
       } catch (error) {
@@ -45,6 +59,11 @@ export function ActivePollsTicker() {
     }
 
     fetchLatestPoll()
+
+    // تحديث كل دقيقة للتحقق من الاستبيانات المنتهية
+    const interval = setInterval(fetchLatestPoll, 60000)
+
+    return () => clearInterval(interval)
   }, [])
 
   if (!latestPoll) return null

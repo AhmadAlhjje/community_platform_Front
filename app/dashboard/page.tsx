@@ -75,7 +75,7 @@ export default function DashboardPage() {
       description: 'اقرأ مقالات توعوية واختبر معلوماتك',
       icon: BookOpen,
       href: '/articles',
-      image: '/images/OIP1.webp',
+      image: '/images/مقالات.jpg',
     },
     {
       title: t('games.title'),
@@ -116,7 +116,7 @@ export default function DashboardPage() {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/55 to-background/60" />
 
         <div className="relative space-y-4">
           <motion.div
@@ -143,7 +143,7 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {activities.map((activity, index) => (
           <ActivityCard key={activity.href} activity={activity} index={index} />
         ))}
