@@ -22,7 +22,7 @@ const ActivityCard = ({ activity, index }: any) => {
       <Link href={activity.href}>
         <Card className="h-full relative overflow-hidden group hover:shadow-2xl hover:border-primary/50 transition-all duration-300 cursor-pointer flex flex-col">
           {/* صورة الخلفية */}
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
+          <div className="absolute inset-0 opacity-50 group-hover:opacity-70 transition-opacity duration-300">
             <Image
               src={activity.image}
               alt={activity.title}
@@ -30,7 +30,7 @@ const ActivityCard = ({ activity, index }: any) => {
               className="object-cover"
             />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/90 to-background/95 group-hover:from-primary/20 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/50 to-background/60 group-hover:from-primary/5 group-hover:via-background/40 group-hover:to-background/50 transition-colors duration-300" />
 
           <CardHeader className="relative">
             <motion.div
@@ -82,21 +82,21 @@ export default function DashboardPage() {
       description: 'العب ألعاب تفاعلية وحقق نقاطاً',
       icon: Gamepad2,
       href: '/games',
-      image: '/images/hero-community.webp',
+      image: '/images/العاب.jpg',
     },
     {
       title: t('polls.title'),
       description: 'شارك في الاستبيانات المجتمعية',
       icon: MessageSquare,
       href: '/polls',
-      image: '/images/OIP2.jpeg',
+      image: '/images/استبيان.jpg',
     },
     {
       title: t('common.leaderboard'),
       description: 'شاهد لوحة الصدارة والترتيبات',
       icon: Trophy,
       href: '/leaderboard',
-      image: '/images/OIP1.webp',
+      image: '/images/لوحة صدارة.jpg',
     },
   ]
 
@@ -143,7 +143,7 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+      <div className="w-full grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {activities.map((activity, index) => (
           <ActivityCard key={activity.href} activity={activity} index={index} />
         ))}

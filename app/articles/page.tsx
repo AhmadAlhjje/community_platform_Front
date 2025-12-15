@@ -60,12 +60,12 @@ export default function ArticlesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-2xl overflow-hidden p-8 md:p-12"
         style={{
-          backgroundImage: 'url(/images/OIP1.webp)',
+          backgroundImage: 'url(/images/مقالات.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/55 to-background/60" />
 
         <div className="relative space-y-4">
           <motion.div
@@ -129,15 +129,15 @@ export default function ArticlesPage() {
             >
               <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:border-primary/50 cursor-pointer">
                 {/* صورة الخلفية */}
-                <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300">
+                <div className="absolute inset-0 opacity-50 group-hover:opacity-70 transition-opacity duration-300">
                   <Image
-                    src="/images/OIP1.webp"
+                    src="/images/مقالات.jpg"
                     alt={article.title}
                     fill
                     className="object-cover"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/90 to-background/95 group-hover:via-background/85 transition-all duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/50 to-background/60 group-hover:via-background/40 group-hover:to-background/50 transition-all duration-300" />
 
                 <CardHeader className="relative">
                   <div className="flex items-start justify-between">

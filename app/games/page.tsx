@@ -121,7 +121,7 @@ export default function GamesPage() {
 
   const GameCard = ({ game, index }: { game: Game; index: number }) => {
     const isPuzzle = game.type === 'puzzle'
-    const gameImage = isPuzzle ? '/images/hero-community.webp' : '/images/OIP2.jpeg'
+    const gameImage = isPuzzle ? '/images/بازل.jpg' : '/images/كلمات متقاطعة.jpg'
 
     return (
       <motion.div
@@ -133,7 +133,7 @@ export default function GamesPage() {
       >
         <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:border-primary/50 cursor-pointer">
           {/* صورة الخلفية */}
-          <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300">
+          <div className="absolute inset-0 opacity-50 group-hover:opacity-70 transition-opacity duration-300">
             <Image
               src={gameImage}
               alt={game.title}
@@ -143,9 +143,9 @@ export default function GamesPage() {
           </div>
           <div className={`absolute inset-0 ${
             isPuzzle
-              ? 'bg-gradient-to-br from-blue-500/10 via-background/90 to-background/95'
-              : 'bg-gradient-to-br from-emerald-500/10 via-background/90 to-background/95'
-          } group-hover:via-background/85 transition-all duration-300`} />
+              ? 'bg-gradient-to-br from-blue-500/10 via-background/50 to-background/60'
+              : 'bg-gradient-to-br from-emerald-500/10 via-background/50 to-background/60'
+          } group-hover:via-background/40 group-hover:to-background/50 transition-all duration-300`} />
 
           <CardHeader className="relative">
             <div className="flex items-start justify-between mb-4">
@@ -220,12 +220,12 @@ export default function GamesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative rounded-2xl overflow-hidden p-8 md:p-12"
           style={{
-            backgroundImage: 'url(/images/hero-community.webp)',
+            backgroundImage: 'url(/images/العاب.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/85 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/75 via-background/55 to-background/60" />
 
           <div className="relative space-y-4">
             <motion.div
