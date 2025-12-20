@@ -407,7 +407,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="flex flex-wrap justify-center items-center gap-8 md:gap-12"
           >
-            {[1, 2].map((num, index) => (
+            {[1].map((num, index) => (
               <motion.div
                 key={num}
                 initial={{ opacity: 0, scale: 0.8 }}
