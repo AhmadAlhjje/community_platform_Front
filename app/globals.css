@@ -88,6 +88,40 @@
   html, body {
     max-width: 100vw;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Prevent any element from causing horizontal scroll */
+  * {
+    max-width: 100%;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ensure container doesn't overflow */
+  .container {
+    max-width: 100% !important;
+  }
+
+  /* Prevent text overflow */
+  h1, h2, h3, h4, h5, h6, p, span {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Ensure all sections are contained */
+  section {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Fix for motion animations */
+  [class*="motion"] {
+    max-width: 100%;
   }
 }
 

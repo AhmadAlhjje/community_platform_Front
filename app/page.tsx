@@ -102,9 +102,9 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
 
         <div className="container relative px-4 sm:px-6 lg:px-8 max-w-full">
-          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center overflow-hidden">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7 }}
               className="space-y-6 md:space-y-8"
@@ -293,9 +293,9 @@ export default function Home() {
       {/* Platform Overview Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24 border-t bg-card/20">
         <div className="container px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center overflow-hidden">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
@@ -312,7 +312,7 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}

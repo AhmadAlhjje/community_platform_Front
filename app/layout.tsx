@@ -15,10 +15,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning className="overflow-x-hidden">
       <body className="font-sans antialiased flex flex-col min-h-screen overflow-x-hidden">
         <ThemeProvider>
-          <div className="flex-1">
+          <div className="flex-1 overflow-x-hidden">
             {children}
           </div>
           <Footer />
