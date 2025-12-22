@@ -69,7 +69,7 @@ export function ActivePollsTicker() {
   if (!latestPoll) return null
 
   return (
-    <div className="relative w-full bg-gradient-to-l from-primary/5 via-primary/10 to-primary/5 border-y border-primary/20 py-4 overflow-hidden">
+    <div className="relative w-full bg-gradient-to-l from-primary/5 via-primary/10 to-primary/5 border-y border-primary/20 py-3 sm:py-4 overflow-hidden max-w-full">
       {/* خلفية متحركة من اليمين لليسار */}
       <div className="absolute inset-0 opacity-20">
         <motion.div
@@ -99,11 +99,11 @@ export function ActivePollsTicker() {
             repeat: Infinity,
             ease: 'linear',
           }}
-          className="flex items-center gap-6 whitespace-nowrap"
+          className="flex items-center gap-4 sm:gap-6 whitespace-nowrap"
         >
           {/* تكرار المحتوى لضمان الحركة المستمرة */}
           {[1, 2, 3].map((iteration) => (
-            <div key={iteration} className="flex items-center gap-6">
+            <div key={iteration} className="flex items-center gap-4 sm:gap-6">
               {/* شارة "جديد" */}
               <motion.div
                 animate={{
@@ -114,7 +114,7 @@ export function ActivePollsTicker() {
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-full text-primary-foreground font-bold text-sm shadow-lg"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-primary rounded-full text-primary-foreground font-bold text-xs sm:text-sm shadow-lg"
               >
                 <motion.div
                   animate={{
@@ -126,7 +126,7 @@ export function ActivePollsTicker() {
                     ease: 'linear',
                   }}
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                 </motion.div>
                 جديد
               </motion.div>
@@ -134,7 +134,7 @@ export function ActivePollsTicker() {
               {/* محتوى الاستبيان */}
               <Link
                 href={user ? "/polls" : "/auth/login"}
-                className="group flex items-center gap-3 px-8 py-3 bg-card/90 backdrop-blur-sm rounded-full border-2 border-primary/30 hover:border-primary/60 transition-all duration-300 hover:shadow-xl hover:scale-105"
+                className="group flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-2 sm:py-3 bg-card/90 backdrop-blur-sm rounded-full border-2 border-primary/30 hover:border-primary/60 transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
                 <motion.div
                   animate={{
@@ -146,17 +146,17 @@ export function ActivePollsTicker() {
                     ease: 'easeInOut',
                   }}
                 >
-                  <MessageSquare className="h-5 w-5 text-primary" />
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </motion.div>
 
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-foreground text-base">استبيان جديد:</span>
-                  <span className="text-foreground/90 font-medium group-hover:text-primary transition-colors">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="font-bold text-foreground text-xs sm:text-base">استبيان جديد:</span>
+                  <span className="text-foreground/90 font-medium group-hover:text-primary transition-colors text-xs sm:text-base">
                     {latestPoll.title}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                   <motion.div
                     animate={{
                       x: [-2, 2, -2],
@@ -168,14 +168,14 @@ export function ActivePollsTicker() {
                     }}
                     className="text-primary"
                   >
-                    <ChevronLeft className="h-5 w-5" />
+                    <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </motion.div>
-                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                 </div>
               </Link>
 
               {/* دعوة للمشاركة */}
-              <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 rounded-full border border-primary/30">
+              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 bg-primary/10 rounded-full border border-primary/30">
                 <motion.span
                   animate={{
                     scale: [1, 1.2, 1],
@@ -185,23 +185,23 @@ export function ActivePollsTicker() {
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}
-                  className="text-2xl"
+                  className="text-lg sm:text-2xl"
                 >
                   👈
                 </motion.span>
-                <span className="font-bold text-foreground">شارك برأيك الآن!</span>
+                <span className="font-bold text-foreground text-xs sm:text-base">شارك برأيك الآن!</span>
               </div>
 
               {/* فاصل */}
-              <div className="w-px h-8 bg-primary/20" />
+              <div className="w-px h-6 sm:h-8 bg-primary/20" />
             </div>
           ))}
         </motion.div>
       </div>
 
       {/* تأثيرات ضوئية على الجوانب */}
-      <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-background via-background/50 to-transparent pointer-events-none z-10" />
-      <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-background via-background/50 to-transparent pointer-events-none z-10" />
+      <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-background via-background/50 to-transparent pointer-events-none z-10" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-background via-background/50 to-transparent pointer-events-none z-10" />
     </div>
   )
 }

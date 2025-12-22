@@ -78,18 +78,18 @@ export function PublicNavbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 max-w-full overflow-x-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Left: Logo and Brand */}
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
               <Link
                 href={user ? "/dashboard" : "/"}
-                className="flex items-center gap-3 group"
+                className="flex items-center gap-2 sm:gap-3 group"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="relative w-14 h-14 sm:w-16 sm:h-16"
+                  className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
                 >
                   <Image
                     src="/images/logo.png"
@@ -210,12 +210,12 @@ export function PublicNavbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-background border-l border-border shadow-2xl md:hidden flex flex-col"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[280px] sm:w-80 max-w-[85vw] bg-background border-l border-border shadow-2xl md:hidden flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2">
-                  <div className="relative w-8 h-8">
+              <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border">
+                <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 min-w-0">
+                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
                     <Image
                       src="/images/logo.png"
                       alt="صوتنا يبني"
@@ -223,15 +223,15 @@ export function PublicNavbar() {
                       className="object-contain"
                     />
                   </div>
-                  <span className="font-bold text-foreground">صوتنا يبني</span>
+                  <span className="font-bold text-foreground text-sm sm:text-base truncate">صوتنا يبني</span>
                 </Link>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="h-9 w-9"
+                  className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
 
@@ -240,32 +240,32 @@ export function PublicNavbar() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="px-4 py-4 border-b border-border bg-muted/30"
+                  className="px-3 sm:px-4 py-3 sm:py-4 border-b border-border bg-muted/30"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                      <User className="h-5 w-5 text-primary-foreground" />
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                      <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <p className="font-medium text-xs sm:text-sm text-foreground truncate">{user.name}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/50">
-                    <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                    <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{currentPoints}</span>
-                    <span className="text-xs text-amber-600 dark:text-amber-500">{t('common.points')}</span>
+                  <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/50">
+                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">{currentPoints}</span>
+                    <span className="text-[10px] sm:text-xs text-amber-600 dark:text-amber-500">{t('common.points')}</span>
                   </div>
                 </motion.div>
               )}
 
               {/* Navigation Links */}
-              <div className="flex-1 overflow-y-auto py-4 px-2">
+              <div className="flex-1 overflow-y-auto py-3 sm:py-4 px-2">
                 <div className="space-y-1">
                   {user && (
                     <>
                       {/* Main navigation section */}
-                      <div className="mb-3">
+                      <div className="mb-2 sm:mb-3">
                         {mainNavItems.map((item, index) => {
                           const Icon = item.icon
                           const isActive = pathname === item.href
@@ -279,15 +279,15 @@ export function PublicNavbar() {
                               <Link
                                 href={item.href}
                                 className={cn(
-                                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200',
+                                  'flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200',
                                   isActive
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                                 )}
                                 onClick={() => setMobileMenuOpen(false)}
                               >
-                                <Icon className="h-5 w-5 flex-shrink-0" />
-                                <span className="flex-1">{item.label}</span>
+                                <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                <span className="flex-1 truncate">{item.label}</span>
                               </Link>
                             </motion.div>
                           )
@@ -314,15 +314,15 @@ export function PublicNavbar() {
                           <Link
                             href={item.href}
                             className={cn(
-                              'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200',
+                              'flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200',
                               isActive
                                 ? 'bg-primary text-primary-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                             )}
                             onClick={() => setMobileMenuOpen(false)}
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
-                            <span className="flex-1">{item.label}</span>
+                            <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                            <span className="flex-1 truncate">{item.label}</span>
                           </Link>
                         </motion.div>
                       )
@@ -332,7 +332,7 @@ export function PublicNavbar() {
               </div>
 
               {/* Footer - Settings & Logout */}
-              <div className="border-t border-border px-4 py-4 space-y-3">
+              <div className="border-t border-border px-3 sm:px-4 py-3 sm:py-4 space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2 justify-center">
                   <ThemeSwitcher />
                   <div className="w-px h-5 bg-border" />
@@ -341,18 +341,18 @@ export function PublicNavbar() {
                 {user ? (
                   <Button
                     variant="outline"
-                    className="w-full justify-center gap-2 font-medium"
+                    className="w-full justify-center gap-2 font-medium text-xs sm:text-sm py-2 sm:py-2.5"
                     onClick={() => {
                       setMobileMenuOpen(false)
                       logout()
                     }}
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {t('common.logout')}
                   </Button>
                 ) : (
                   <Link href="/auth/login" className="w-full">
-                    <Button variant="default" className="w-full justify-center gap-2 font-medium">
+                    <Button variant="default" className="w-full justify-center gap-2 font-medium text-xs sm:text-sm py-2 sm:py-2.5">
                       دخول
                     </Button>
                   </Link>
