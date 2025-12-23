@@ -49,6 +49,15 @@ export default function ArticlePage() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [currentPage, article])
 
+  // Scroll to top when page changes
+  // useEffect(() => {
+  //   window.scrollTo({
+  //     top: 0,
+  //     left: 0,
+  //     behavior: 'smooth'
+  //   })
+  // }, [currentPage])
+
   const fetchArticle = async () => {
     try {
       const response = await apiClient.get<{ success: boolean; data: Article }>(`/api/articles/${params.id}`)
@@ -137,7 +146,6 @@ export default function ArticlePage() {
     if (currentPage < pages.length - 1) {
       setPageDirection('next')
       setCurrentPage(currentPage + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -145,7 +153,6 @@ export default function ArticlePage() {
     if (currentPage > 0) {
       setPageDirection('prev')
       setCurrentPage(currentPage - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -156,7 +163,6 @@ export default function ArticlePage() {
     if (pageIndex >= 0 && pageIndex < pages.length) {
       setPageDirection(pageIndex > currentPage ? 'next' : 'prev')
       setCurrentPage(pageIndex)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
