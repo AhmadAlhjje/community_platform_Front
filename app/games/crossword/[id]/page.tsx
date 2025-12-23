@@ -29,38 +29,76 @@ export default function CrosswordPage() {
   const [startTime] = useState(Date.now())
   const [helperLetters, setHelperLetters] = useState<{ [key: number]: string[] }>({})
   const [usedLetters, setUsedLetters] = useState<{ [key: number]: string[] }>({})
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
   const { t } = useTranslation()
   const { toast } = useToast()
 
-  // Calculate dynamic cell size based on grid dimensions
-  const getCellSizeClasses = () => {
-    if (!grid || grid.length === 0) return 'w-10 h-10 text-base'
+  // Calculate dynamic cell size based on grid dimensions and viewport
+  const getGridStyles = () => {
+    if (!grid || grid.length === 0) return { cellSize: 40, fontSize: 16 }
 
     const rows = grid.length
     const cols = grid[0]?.length || 0
     const maxDimension = Math.max(rows, cols)
 
-    // For small grids (up to 8x8), use larger cells
+    // Get available width - more aggressive on mobile
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 600
+
+    // Adaptive padding based on screen size
+    let padding: number
+    if (viewportWidth < 640) { // mobile
+      padding = 60
+    } else if (viewportWidth < 1024) { // tablet
+      padding = 100
+    } else { // desktop
+      padding = 140
+    }
+
+    const availableWidth = Math.min(viewportWidth - padding, 700)
+
+    // Calculate cell size to ensure grid fits perfectly
+    let baseCellSize = Math.floor(availableWidth / maxDimension)
+
+    // Apply size constraints - allow smaller cells on mobile for large grids
+    let cellSize: number
+    let fontSize: number
+
     if (maxDimension <= 8) {
-      return 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-lg sm:text-xl md:text-2xl'
+      cellSize = Math.min(70, Math.max(viewportWidth < 640 ? 35 : 45, baseCellSize))
+      fontSize = Math.max(12, Math.min(24, cellSize * 0.4))
+    } else if (maxDimension <= 12) {
+      cellSize = Math.min(55, Math.max(viewportWidth < 640 ? 28 : 35, baseCellSize))
+      fontSize = Math.max(10, Math.min(18, cellSize * 0.35))
+    } else if (maxDimension <= 15) {
+      cellSize = Math.min(45, Math.max(viewportWidth < 640 ? 22 : 28, baseCellSize))
+      fontSize = Math.max(9, Math.min(16, cellSize * 0.3))
+    } else {
+      cellSize = Math.min(38, Math.max(viewportWidth < 640 ? 18 : 22, baseCellSize))
+      fontSize = Math.max(8, Math.min(14, cellSize * 0.28))
     }
-    // For medium grids (9x9 to 12x12), use medium cells
-    else if (maxDimension <= 12) {
-      return 'w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-base sm:text-lg md:text-xl'
-    }
-    // For large grids (13x13 to 15x15), use smaller cells
-    else if (maxDimension <= 15) {
-      return 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-sm sm:text-base md:text-lg'
-    }
-    // For very large grids (16x16+), use very small cells
-    else {
-      return 'w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-xs sm:text-sm md:text-base'
-    }
+
+    return { cellSize, fontSize }
   }
 
   useEffect(() => {
     fetchGame()
   }, [params.id])
+
+  // Handle window resize for responsive grid
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight })
+    }
+
+    // Set initial size
+    handleResize()
+
+    // Add event listener
+    window.addEventListener('resize', handleResize)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const fetchGame = async () => {
     try {
@@ -702,78 +740,111 @@ export default function CrosswordPage() {
           </CardHeader>
           <CardContent className="pt-6">
             {/* Responsive container that scales based on grid size */}
-            <div className="flex items-center justify-center">
-              <div className="overflow-auto max-h-[70vh] max-w-full rounded-xl border-2 border-gray-200 dark:border-gray-700">
-                <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-2 sm:p-4 md:p-6">
-                  {grid.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex">
-                      {row.map((cell, colIndex) => {
-                        const isBlocked = cell === '#'
-                        const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
-                        const userValue = userGrid[rowIndex]?.[colIndex] || ''
-                        const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
-                        const wordNumbers = getWordNumbersForCell(rowIndex, colIndex)
-                        const cellSizeClasses = getCellSizeClasses()
+            <div className="flex items-center justify-center w-full">
+              <div
+                className="w-full max-w-full overflow-x-auto overflow-y-auto rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+                style={{
+                  maxHeight: '70vh',
+                  scrollbarWidth: 'thin',
+                  scrollBehavior: 'smooth'
+                }}
+              >
+                <div className="inline-flex flex-col items-center justify-center min-w-full p-2 sm:p-4">
+                  {(() => {
+                    const { cellSize, fontSize } = getGridStyles()
+                    return grid.map((row, rowIndex) => (
+                      <div key={rowIndex} className="flex" style={{ height: `${cellSize}px` }}>
+                        {row.map((cell, colIndex) => {
+                          const isBlocked = cell === '#'
+                          const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
+                          const userValue = userGrid[rowIndex]?.[colIndex] || ''
+                          const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
+                          const wordNumbers = getWordNumbersForCell(rowIndex, colIndex)
 
-                        return (
-                          <div
-                            key={colIndex}
-                            className="relative"
-                          >
-                            <input
-                              type="text"
-                              value={isBlocked ? '' : userValue}
-                              readOnly
-                              onClick={() => handleCellClick(rowIndex, colIndex)}
-                              onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
-                              disabled={isBlocked || completed}
-                              data-row={rowIndex}
-                              data-col={colIndex}
-                              className={`
-                                ${cellSizeClasses} text-center font-bold border-2
-                                transition-all duration-200 rounded-sm
-                                ${isBlocked
-                                  ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
-                                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
-                                }
-                                ${isSelected && !isBlocked ? 'border-blue-500 ring-2 sm:ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
-                                ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
-                                ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
-                                focus:outline-none
-                              `}
-                            />
-                          {/* Across number - top left */}
-                          {wordNumbers.across && (
-                            <span
-                              className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 text-[9px] sm:text-xs font-bold px-0.5 sm:px-1 rounded bg-blue-600 text-white pointer-events-none"
-                              style={{ lineHeight: '1.2' }}
+                          return (
+                            <div
+                              key={colIndex}
+                              className="relative"
+                              style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
                             >
-                              {wordNumbers.across}
-                            </span>
-                          )}
-                          {/* Down number - bottom left */}
-                          {wordNumbers.down && (
-                            <span
-                              className="absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1 text-[9px] sm:text-xs font-bold px-0.5 sm:px-1 rounded bg-indigo-600 text-white pointer-events-none"
-                              style={{ lineHeight: '1.2' }}
-                            >
-                              {wordNumbers.down}
-                            </span>
-                          )}
-                          {isCorrect && completed && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                            >
-                              <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
-                            </motion.div>
-                          )}
-                        </div>
-                      )
-                      })}
-                    </div>
-                  ))}
+                              <input
+                                type="text"
+                                value={isBlocked ? '' : userValue}
+                                readOnly
+                                onClick={() => handleCellClick(rowIndex, colIndex)}
+                                onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
+                                disabled={isBlocked || completed}
+                                data-row={rowIndex}
+                                data-col={colIndex}
+                                style={{
+                                  width: `${cellSize}px`,
+                                  height: `${cellSize}px`,
+                                  fontSize: `${fontSize}px`,
+                                }}
+                                className={`
+                                  text-center font-bold border-2
+                                  transition-all duration-200 rounded-sm
+                                  ${isBlocked
+                                    ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
+                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
+                                  }
+                                  ${isSelected && !isBlocked ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
+                                  ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
+                                  ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
+                                  focus:outline-none
+                                `}
+                              />
+                              {/* Across number - top left */}
+                              {wordNumbers.across && (
+                                <span
+                                  className="absolute font-bold rounded bg-blue-600 text-white pointer-events-none"
+                                  style={{
+                                    top: Math.max(1, cellSize * 0.05) + 'px',
+                                    left: Math.max(1, cellSize * 0.05) + 'px',
+                                    fontSize: Math.max(8, Math.min(12, cellSize * 0.25)) + 'px',
+                                    padding: `${Math.max(1, cellSize * 0.03)}px ${Math.max(2, cellSize * 0.06)}px`,
+                                    lineHeight: '1.2'
+                                  }}
+                                >
+                                  {wordNumbers.across}
+                                </span>
+                              )}
+                              {/* Down number - bottom left */}
+                              {wordNumbers.down && (
+                                <span
+                                  className="absolute font-bold rounded bg-indigo-600 text-white pointer-events-none"
+                                  style={{
+                                    bottom: Math.max(1, cellSize * 0.05) + 'px',
+                                    left: Math.max(1, cellSize * 0.05) + 'px',
+                                    fontSize: Math.max(8, Math.min(12, cellSize * 0.25)) + 'px',
+                                    padding: `${Math.max(1, cellSize * 0.03)}px ${Math.max(2, cellSize * 0.06)}px`,
+                                    lineHeight: '1.2'
+                                  }}
+                                >
+                                  {wordNumbers.down}
+                                </span>
+                              )}
+                              {isCorrect && completed && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                                >
+                                  <CheckCircle
+                                    style={{
+                                      width: `${Math.max(12, Math.min(24, cellSize * 0.4))}px`,
+                                      height: `${Math.max(12, Math.min(24, cellSize * 0.4))}px`
+                                    }}
+                                    className="text-green-600"
+                                  />
+                                </motion.div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ))
+                  })()}
                 </div>
               </div>
             </div>
