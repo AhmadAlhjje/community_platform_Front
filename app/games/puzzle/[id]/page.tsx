@@ -133,11 +133,18 @@ export default function PuzzlePage() {
 
       let content: PuzzleData | null = null
       try {
-        let parsed = JSON.parse(response.data.content)
-        if (typeof parsed === 'string') {
-          parsed = JSON.parse(parsed)
+        // Check if content is already an object
+        if (typeof response.data.content === 'object' && response.data.content !== null) {
+          content = response.data.content
+        } else if (typeof response.data.content === 'string') {
+          let parsed = JSON.parse(response.data.content)
+          if (typeof parsed === 'string') {
+            parsed = JSON.parse(parsed)
+          }
+          content = parsed
+        } else {
+          throw new Error('Invalid content format')
         }
-        content = parsed
       } catch (parseError) {
         console.error('Error parsing content:', parseError)
         toast({

@@ -63,15 +63,22 @@ export default function CrosswordPage() {
       // Parse the content - it comes as a JSON string that might be double-encoded
       let content: CrosswordData | null = null
       try {
-        // First parse attempt
-        let parsed = JSON.parse(response.data.content)
+        // Check if content is already an object
+        if (typeof response.data.content === 'object' && response.data.content !== null) {
+          content = response.data.content
+        } else if (typeof response.data.content === 'string') {
+          // First parse attempt
+          let parsed = JSON.parse(response.data.content)
 
-        // If it's a string (double-encoded), parse again
-        if (typeof parsed === 'string') {
-          parsed = JSON.parse(parsed)
+          // If it's a string (double-encoded), parse again
+          if (typeof parsed === 'string') {
+            parsed = JSON.parse(parsed)
+          }
+
+          content = parsed
+        } else {
+          throw new Error('Invalid content format')
         }
-
-        content = parsed
       } catch (parseError) {
         console.error('Error parsing content:', parseError)
         toast({
