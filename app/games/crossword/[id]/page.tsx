@@ -279,15 +279,22 @@ export default function CrosswordPage() {
     return helpers
   }
 
-  const getWordNumberForCell = (row: number, col: number): number | null => {
-    if (!crosswordData || !crosswordData.words) return null
+  const getWordNumbersForCell = (row: number, col: number): { across: number | null; down: number | null } => {
+    if (!crosswordData || !crosswordData.words) return { across: null, down: null }
 
-    // Find if this cell is the start of any word
-    const word = crosswordData.words.find(w =>
-      w.position.row === row && w.position.col === col
+    // Find words that start at this cell
+    const acrossWord = crosswordData.words.find(w =>
+      w.position.row === row && w.position.col === col && w.direction === 'across'
     )
 
-    return word ? word.number : null
+    const downWord = crosswordData.words.find(w =>
+      w.position.row === row && w.position.col === col && w.direction === 'down'
+    )
+
+    return {
+      across: acrossWord ? acrossWord.number : null,
+      down: downWord ? downWord.number : null
+    }
   }
 
   const handleCellClear = (row: number, col: number) => {
@@ -668,63 +675,84 @@ export default function CrosswordPage() {
             <CardTitle className="text-xl text-blue-900 dark:text-blue-100">الشبكة</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl shadow-inner">
-              {grid.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex">
-                  {row.map((cell, colIndex) => {
-                    const isBlocked = cell === '#'
-                    const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
-                    const userValue = userGrid[rowIndex]?.[colIndex] || ''
-                    const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
-                    const wordNumber = getWordNumberForCell(rowIndex, colIndex)
+            {/* Scrollable container for mobile responsiveness */}
+            <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-xl border-2 border-gray-200 dark:border-gray-700">
+              <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-6 min-w-min">
+                {grid.map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex">
+                    {row.map((cell, colIndex) => {
+                      const isBlocked = cell === '#'
+                      const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
+                      const userValue = userGrid[rowIndex]?.[colIndex] || ''
+                      const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
+                      const wordNumbers = getWordNumbersForCell(rowIndex, colIndex)
 
-                    return (
-                      <div
-                        key={colIndex}
-                        className="relative"
-                      >
-                        <input
-                          type="text"
-                          value={isBlocked ? '' : userValue}
-                          readOnly
-                          onClick={() => handleCellClick(rowIndex, colIndex)}
-                          onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
-                          disabled={isBlocked || completed}
-                          data-row={rowIndex}
-                          data-col={colIndex}
-                          className={`
-                            w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2
-                            transition-all duration-200 rounded-sm
-                            ${isBlocked
-                              ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
-                              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
-                            }
-                            ${isSelected && !isBlocked ? 'border-blue-500 ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
-                            ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
-                            ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
-                            focus:outline-none
-                          `}
-                        />
-                        {wordNumber && (
-                          <span className="absolute top-1 left-1 text-xs font-bold text-blue-600 dark:text-blue-400 pointer-events-none bg-white dark:bg-gray-800 px-1 rounded">
-                            {wordNumber}
-                          </span>
-                        )}
-                        {isCorrect && completed && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                          >
-                            <CheckCircle className="h-6 w-6 text-green-600" />
-                          </motion.div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
+                      return (
+                        <div
+                          key={colIndex}
+                          className="relative"
+                        >
+                          <input
+                            type="text"
+                            value={isBlocked ? '' : userValue}
+                            readOnly
+                            onClick={() => handleCellClick(rowIndex, colIndex)}
+                            onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
+                            disabled={isBlocked || completed}
+                            data-row={rowIndex}
+                            data-col={colIndex}
+                            className={`
+                              w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-center text-base sm:text-xl md:text-2xl font-bold border-2
+                              transition-all duration-200 rounded-sm
+                              ${isBlocked
+                                ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
+                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
+                              }
+                              ${isSelected && !isBlocked ? 'border-blue-500 ring-2 sm:ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
+                              ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
+                              ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
+                              focus:outline-none
+                            `}
+                          />
+                          {/* Across number - top left */}
+                          {wordNumbers.across && (
+                            <span
+                              className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 text-[9px] sm:text-xs font-bold px-0.5 sm:px-1 rounded bg-blue-600 text-white pointer-events-none"
+                              style={{ lineHeight: '1.2' }}
+                            >
+                              {wordNumbers.across}
+                            </span>
+                          )}
+                          {/* Down number - bottom left */}
+                          {wordNumbers.down && (
+                            <span
+                              className="absolute bottom-0.5 left-0.5 sm:bottom-1 sm:left-1 text-[9px] sm:text-xs font-bold px-0.5 sm:px-1 rounded bg-indigo-600 text-white pointer-events-none"
+                              style={{ lineHeight: '1.2' }}
+                            >
+                              {wordNumbers.down}
+                            </span>
+                          )}
+                          {isCorrect && completed && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                            >
+                              <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+                            </motion.div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* Hint for mobile users */}
+            <p className="text-xs sm:text-sm text-muted-foreground mt-3 text-center">
+              يمكنك التمرير أفقياً وعمودياً لرؤية الشبكة بالكامل
+            </p>
 
             <div className="flex gap-3 mt-6">
               <Button

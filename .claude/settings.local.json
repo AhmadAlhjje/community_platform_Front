@@ -26,7 +26,8 @@
       "Bash(npx tsc:*)",
       "Bash(timeout 3 bash:*)",
       "Bash(timeout 5 bash:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(timeout 120 npm run build)"
     ],
     "deny": [],
     "ask": []
