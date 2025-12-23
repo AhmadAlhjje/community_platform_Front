@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
@@ -26,8 +27,16 @@ export default function RegisterPage() {
   const [verifying, setVerifying] = useState(false)
   const [resending, setResending] = useState(false)
   const [hasPendingVerification, setHasPendingVerification] = useState(false)
-  const { register, verifyOTP, resendOTP } = useAuth()
+  const { register, verifyOTP, resendOTP, user } = useAuth()
   const { t } = useTranslation()
+  const router = useRouter()
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user) {
+      router.replace('/dashboard')
+    }
+  }, [user, router])
 
   // Check for pending verification on component mount
   useEffect(() => {
@@ -37,6 +46,11 @@ export default function RegisterPage() {
       setHasPendingVerification(true)
     }
   }, [])
+
+  // Show loading while checking user status
+  if (user) {
+    return null
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
