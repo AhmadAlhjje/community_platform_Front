@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Trophy, CheckCircle, Award, Lightbulb, RotateCcw, X } from 'lucide-react'
 import Link from 'next/link'
+import { LoadingSpinner } from '@/components/loading-spinner'
 
 export default function CrosswordPage() {
   const params = useParams()
@@ -23,6 +24,8 @@ export default function CrosswordPage() {
   const [selectedWord, setSelectedWord] = useState<number | null>(null)
   const [completed, setCompleted] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [completing, setCompleting] = useState(false)
   const [startTime] = useState(Date.now())
   const [helperLetters, setHelperLetters] = useState<{ [key: number]: string[] }>({})
   const [usedLetters, setUsedLetters] = useState<{ [key: number]: string[] }>({})
@@ -201,6 +204,8 @@ export default function CrosswordPage() {
         description: 'حدث خطأ في تحميل اللعبة',
         variant: 'destructive',
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -500,8 +505,9 @@ export default function CrosswordPage() {
   }
 
   const handleComplete = async () => {
-    if (!game) return
+    if (!game || completing) return
 
+    setCompleting(true)
     const completionTime = Math.floor((Date.now() - startTime) / 1000)
 
     try {
@@ -527,13 +533,15 @@ export default function CrosswordPage() {
         description: error.message,
         variant: 'destructive',
       })
+    } finally {
+      setCompleting(false)
     }
   }
 
-  if (!game || !crosswordData || grid.length === 0) {
+  if (loading || !game || !crosswordData || grid.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
         <p className="text-muted-foreground">جاري التحميل...</p>
       </div>
     )

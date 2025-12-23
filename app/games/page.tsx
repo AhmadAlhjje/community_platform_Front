@@ -11,12 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Puzzle, Grid3x3, CheckCircle2, Award, Star, Trophy, Gamepad2, Sparkles } from 'lucide-react'
 import Image from 'next/image'
+import { LoadingSpinner } from '@/components/loading-spinner'
 
 type TabType = 'puzzle' | 'crossword' | 'completed'
 
 export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingGameId, setLoadingGameId] = useState<string | null>(null)
   const [completedGameIds, setCompletedGameIds] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<TabType>('puzzle')
   const { t } = useTranslation()
@@ -100,6 +102,7 @@ export default function GamesPage() {
       return
     }
 
+    setLoadingGameId(game.id)
     const gameLink = game.type === 'puzzle' ? `/games/puzzle/${game.id}` : `/games/crossword/${game.id}`
     router.push(gameLink)
   }
@@ -183,8 +186,14 @@ export default function GamesPage() {
               onClick={() => handlePlayGame(game)}
               className="w-full transition-all"
               variant={game.isCompleted ? 'outline' : 'default'}
+              disabled={loadingGameId === game.id}
             >
-              {game.isCompleted ? (
+              {loadingGameId === game.id ? (
+                <>
+                  <LoadingSpinner size="sm" className="ml-2" />
+                  جاري التحميل...
+                </>
+              ) : game.isCompleted ? (
                 <>
                   <CheckCircle2 className="h-4 w-4 ml-2" />
                   تم الإكمال
@@ -205,7 +214,7 @@ export default function GamesPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
         <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     )

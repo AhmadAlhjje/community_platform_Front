@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Trophy, Lightbulb, RotateCcw, X, Volume2, VolumeX, Check } from 'lucide-react'
 import Link from 'next/link'
+import { LoadingSpinner } from '@/components/loading-spinner'
 
 interface PuzzleData {
   pieces: number
@@ -42,6 +43,7 @@ export default function PuzzlePage() {
   const [moves, setMoves] = useState(0)
   const [showSuccess, setShowSuccess] = useState(false)
   const [checking, setChecking] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [startTime] = useState(Date.now())
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [gridCols, setGridCols] = useState(3)
@@ -183,6 +185,8 @@ export default function PuzzlePage() {
         description: 'حدث خطأ في تحميل اللعبة',
         variant: 'destructive',
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -443,10 +447,10 @@ export default function PuzzlePage() {
     setPieces([...pieces].sort(() => Math.random() - 0.5))
   }
 
-  if (!game || !puzzleData || pieces.length === 0) {
+  if (loading || !game || !puzzleData || pieces.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
         <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
@@ -701,6 +705,7 @@ export default function PuzzlePage() {
                     onClick={resetGame}
                     variant="outline"
                     className="flex-1 border-2"
+                    disabled={checking}
                   >
                     <RotateCcw className="h-4 w-4 ml-2" />
                     إعادة
@@ -710,8 +715,17 @@ export default function PuzzlePage() {
                     disabled={placedPieces.length !== puzzleData.pieces || checking}
                     className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                   >
-                    <Check className="h-4 w-4 ml-2" />
-                    {checking ? 'جاري التحقق...' : 'تحقق من الحل'}
+                    {checking ? (
+                      <>
+                        <LoadingSpinner size="sm" className="ml-2" />
+                        جاري التحقق...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 ml-2" />
+                        تحقق من الحل
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
