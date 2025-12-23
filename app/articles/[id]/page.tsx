@@ -551,19 +551,64 @@ export default function ArticlePage() {
                 key={currentPage}
                 initial={{
                   opacity: 0,
-                  rotateY: pageDirection === 'next' ? -15 : 15,
-                  x: pageDirection === 'next' ? 50 : -50
+                  rotateY: pageDirection === 'next' ? 15 : -15,
+                  x: pageDirection === 'next' ? -100 : 100,
+                  transformOrigin: pageDirection === 'next' ? 'right' : 'left'
                 }}
-                animate={{ opacity: 1, rotateY: 0, x: 0 }}
+                animate={{
+                  opacity: 1,
+                  rotateY: 0,
+                  x: 0,
+                  transformOrigin: 'center'
+                }}
                 exit={{
                   opacity: 0,
-                  rotateY: pageDirection === 'next' ? 15 : -15,
-                  x: pageDirection === 'next' ? -50 : 50
+                  rotateY: pageDirection === 'next' ? -15 : 15,
+                  x: pageDirection === 'next' ? 100 : -100,
+                  transformOrigin: pageDirection === 'next' ? 'right' : 'left'
                 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                style={{ perspective: '1000px' }}
+                transition={{
+                  duration: 0.6,
+                  ease: [0.43, 0.13, 0.23, 0.96] // Custom easing for book flip
+                }}
+                style={{ perspective: '2000px' }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.1}
+                whileDrag={{
+                  scale: 0.98,
+                  cursor: 'grabbing',
+                  rotateY: 2
+                }}
+                className="cursor-grab"
+                onDragEnd={(_, { offset, velocity }) => {
+                  const swipe = offset.x * velocity.x
+
+                  // Swipe right (next page) - السحب لليمين = الصفحة التالية (مثل تقليب الدفتر)
+                  if (swipe > 500 && currentPage < totalPages - 1) {
+                    goToNextPage()
+                  }
+                  // Swipe left (previous page) - السحب لليسار = الصفحة السابقة
+                  else if (swipe < -500 && currentPage > 0) {
+                    goToPrevPage()
+                  }
+                }}
               >
-                <Card className="relative overflow-hidden shadow-2xl border-2">
+                <Card className="relative overflow-hidden shadow-2xl border-2" style={{ transformStyle: 'preserve-3d' }}>
+                  {/* Page flip shadow effect */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0 }}
+                    exit={{
+                      opacity: pageDirection === 'next' ? 0.3 : 0.3,
+                      background: pageDirection === 'next'
+                        ? 'linear-gradient(to left, rgba(0,0,0,0.2), transparent)'
+                        : 'linear-gradient(to right, rgba(0,0,0,0.2), transparent)'
+                    }}
+                    transition={{ duration: 0.3 }}
+                  />
+
                   {/* Book-like texture background */}
                   <div className="absolute inset-0 opacity-[0.03]">
                     <Image src="/images/OIP1.webp" alt="Article" fill className="object-cover" />
@@ -573,6 +618,18 @@ export default function ArticlePage() {
                   {/* Decorative book spine effect */}
                   <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-primary/10 to-transparent" />
                   <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-primary/10 to-transparent" />
+
+                  {/* Swipe indicators */}
+                  {currentPage > 0 && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-30 hover:opacity-60 transition-opacity pointer-events-none">
+                      <ChevronRight className="h-8 w-8 text-primary animate-pulse" />
+                    </div>
+                  )}
+                  {currentPage < totalPages - 1 && (
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-30 hover:opacity-60 transition-opacity pointer-events-none">
+                      <ChevronLeft className="h-8 w-8 text-primary animate-pulse" />
+                    </div>
+                  )}
 
                   <CardContent className="relative py-12 px-8 md:px-16 lg:px-20 min-h-[600px] flex flex-col">
                     {/* Decorative top border */}
