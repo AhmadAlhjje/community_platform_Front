@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, CheckCircle2, BookOpen, Trophy, Target, Sparkles } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, BookOpen, Trophy, Target, Sparkles, User, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -388,6 +388,43 @@ export default function ArticlePage() {
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
             {article.title}
           </h1>
+
+          {/* Author and Source Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap items-center gap-4 mt-6 pt-4 border-t border-border/50"
+          >
+            {/* Author */}
+            {article.author && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                <User className="h-4 w-4 text-primary" />
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">الكاتب</span>
+                  <span className="text-sm font-semibold text-foreground">{article.author}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Source */}
+            {article.source && (
+              <a
+                href={article.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-secondary/70 rounded-lg border border-border transition-colors group"
+              >
+                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">المصدر</span>
+                  <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    زيارة المصدر الأصلي
+                  </span>
+                </div>
+              </a>
+            )}
+          </motion.div>
         </div>
       </motion.div>
 
