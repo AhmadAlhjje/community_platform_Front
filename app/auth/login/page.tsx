@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
@@ -10,7 +11,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
-import { LanguageSwitcher } from '@/components/language-switcher'
 import { LogIn, ArrowRight, Sparkles, Phone, Eye, EyeOff } from 'lucide-react'
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
@@ -39,9 +39,15 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 sm:p-6">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">م</span>
+        <Link href="/" className="flex items-center gap-2 sm:gap-3">
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+            <Image
+              src="/images/logo.png"
+              alt="صوتنا يبني"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
           <span className="text-lg font-bold hidden sm:inline">{t('common.appName')}</span>
         </Link>
