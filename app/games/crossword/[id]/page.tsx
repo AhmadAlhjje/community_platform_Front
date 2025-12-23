@@ -32,6 +32,32 @@ export default function CrosswordPage() {
   const { t } = useTranslation()
   const { toast } = useToast()
 
+  // Calculate dynamic cell size based on grid dimensions
+  const getCellSizeClasses = () => {
+    if (!grid || grid.length === 0) return 'w-10 h-10 text-base'
+
+    const rows = grid.length
+    const cols = grid[0]?.length || 0
+    const maxDimension = Math.max(rows, cols)
+
+    // For small grids (up to 8x8), use larger cells
+    if (maxDimension <= 8) {
+      return 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-lg sm:text-xl md:text-2xl'
+    }
+    // For medium grids (9x9 to 12x12), use medium cells
+    else if (maxDimension <= 12) {
+      return 'w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-base sm:text-lg md:text-xl'
+    }
+    // For large grids (13x13 to 15x15), use smaller cells
+    else if (maxDimension <= 15) {
+      return 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-sm sm:text-base md:text-lg'
+    }
+    // For very large grids (16x16+), use very small cells
+    else {
+      return 'w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-xs sm:text-sm md:text-base'
+    }
+  }
+
   useEffect(() => {
     fetchGame()
   }, [params.id])
@@ -675,45 +701,47 @@ export default function CrosswordPage() {
             <CardTitle className="text-xl text-blue-900 dark:text-blue-100">الشبكة</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            {/* Scrollable container for mobile responsiveness */}
-            <div className="overflow-x-auto overflow-y-auto max-h-[600px] rounded-xl border-2 border-gray-200 dark:border-gray-700">
-              <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-6 min-w-min">
-                {grid.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex">
-                    {row.map((cell, colIndex) => {
-                      const isBlocked = cell === '#'
-                      const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
-                      const userValue = userGrid[rowIndex]?.[colIndex] || ''
-                      const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
-                      const wordNumbers = getWordNumbersForCell(rowIndex, colIndex)
+            {/* Responsive container that scales based on grid size */}
+            <div className="flex items-center justify-center">
+              <div className="overflow-auto max-h-[70vh] max-w-full rounded-xl border-2 border-gray-200 dark:border-gray-700">
+                <div className="inline-block bg-gray-50 dark:bg-gray-900/50 p-2 sm:p-4 md:p-6">
+                  {grid.map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex">
+                      {row.map((cell, colIndex) => {
+                        const isBlocked = cell === '#'
+                        const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
+                        const userValue = userGrid[rowIndex]?.[colIndex] || ''
+                        const isCorrect = userValue && userValue.toLowerCase() === cell.toLowerCase()
+                        const wordNumbers = getWordNumbersForCell(rowIndex, colIndex)
+                        const cellSizeClasses = getCellSizeClasses()
 
-                      return (
-                        <div
-                          key={colIndex}
-                          className="relative"
-                        >
-                          <input
-                            type="text"
-                            value={isBlocked ? '' : userValue}
-                            readOnly
-                            onClick={() => handleCellClick(rowIndex, colIndex)}
-                            onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
-                            disabled={isBlocked || completed}
-                            data-row={rowIndex}
-                            data-col={colIndex}
-                            className={`
-                              w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-center text-base sm:text-xl md:text-2xl font-bold border-2
-                              transition-all duration-200 rounded-sm
-                              ${isBlocked
-                                ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
-                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
-                              }
-                              ${isSelected && !isBlocked ? 'border-blue-500 ring-2 sm:ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
-                              ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
-                              ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
-                              focus:outline-none
-                            `}
-                          />
+                        return (
+                          <div
+                            key={colIndex}
+                            className="relative"
+                          >
+                            <input
+                              type="text"
+                              value={isBlocked ? '' : userValue}
+                              readOnly
+                              onClick={() => handleCellClick(rowIndex, colIndex)}
+                              onFocus={() => !isBlocked && setSelectedCell({ row: rowIndex, col: colIndex })}
+                              disabled={isBlocked || completed}
+                              data-row={rowIndex}
+                              data-col={colIndex}
+                              className={`
+                                ${cellSizeClasses} text-center font-bold border-2
+                                transition-all duration-200 rounded-sm
+                                ${isBlocked
+                                  ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
+                                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
+                                }
+                                ${isSelected && !isBlocked ? 'border-blue-500 ring-2 sm:ring-4 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
+                                ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}
+                                ${!isBlocked && !completed && !isSelected ? 'hover:border-blue-300 hover:shadow-md hover:scale-102' : ''}
+                                focus:outline-none
+                              `}
+                            />
                           {/* Across number - top left */}
                           {wordNumbers.across && (
                             <span
@@ -743,16 +771,25 @@ export default function CrosswordPage() {
                           )}
                         </div>
                       )
-                    })}
-                  </div>
-                ))}
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Hint for mobile users */}
-            <p className="text-xs sm:text-sm text-muted-foreground mt-3 text-center">
-              يمكنك التمرير أفقياً وعمودياً لرؤية الشبكة بالكامل
-            </p>
+            {/* Hint for users - dynamic based on grid size */}
+            {(() => {
+              const maxDimension = Math.max(grid.length, grid[0]?.length || 0)
+              if (maxDimension > 12) {
+                return (
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-3 text-center">
+                    يمكنك التمرير لرؤية الشبكة بالكامل أو استخدام زر التكبير/التصغير في متصفحك
+                  </p>
+                )
+              }
+              return null
+            })()}
 
             <div className="flex gap-3 mt-6">
               <Button
