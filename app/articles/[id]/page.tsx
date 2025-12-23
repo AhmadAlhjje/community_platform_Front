@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { apiClient } from '@/lib/api-client'
@@ -24,6 +24,7 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(0)
   const [pageDirection, setPageDirection] = useState<'next' | 'prev'>('next')
+  const articleContentRef = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
   const { toast } = useToast()
 
@@ -49,14 +50,15 @@ export default function ArticlePage() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [currentPage, article])
 
-  // Scroll to top when page changes
-  // useEffect(() => {
-  //   window.scrollTo({
-  //     top: 0,
-  //     left: 0,
-  //     behavior: 'smooth'
-  //   })
-  // }, [currentPage])
+  // Scroll to article content when page changes
+  useEffect(() => {
+    if (articleContentRef.current) {
+      articleContentRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }, [currentPage])
 
   const fetchArticle = async () => {
     try {
@@ -537,7 +539,7 @@ export default function ArticlePage() {
       </motion.div>
 
       {/* Article Content - Book Style with Pagination */}
-      <div className="max-w-4xl mx-auto">
+      <div ref={articleContentRef} className="max-w-4xl mx-auto">
         {(() => {
           const pages = splitContentByWords(article.content)
           const totalPages = pages.length
