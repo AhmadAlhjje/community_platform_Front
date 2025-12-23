@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, CheckCircle2, BookOpen, Trophy, Target, Sparkles, User, ExternalLink } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, BookOpen, Trophy, Target, Sparkles, User, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -22,13 +22,32 @@ export default function ArticlePage() {
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({})
   const [result, setResult] = useState<SurveySubmitResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [pageDirection, setPageDirection] = useState<'next' | 'prev'>('next')
   const { t } = useTranslation()
   const { toast } = useToast()
+
+  // Get words per page from env or default to 400
+  const wordsPerPage = parseInt(process.env.NEXT_PUBLIC_ARTICLE_WORDS_PER_PAGE || '400', 10)
 
   useEffect(() => {
     fetchArticle()
     fetchSurvey()
   }, [params.id])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        goToPrevPage()
+      } else if (e.key === 'ArrowLeft') {
+        goToNextPage()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [currentPage, article])
 
   const fetchArticle = async () => {
     try {
@@ -56,6 +75,89 @@ export default function ArticlePage() {
 
   const handleFinishReading = () => {
     setShowQuiz(true)
+    // Scroll to top smoothly when quiz starts
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Function to split content by word count
+  const splitContentByWords = (content: string): string[][] => {
+    // Split by both \n\n and \n to get all text blocks
+    const allParagraphs = content.split(/\n+/).filter(p => p.trim())
+
+    // If we have very few paragraphs, split the content by words directly
+    if (allParagraphs.length <= 3) {
+      const allWords = content.trim().split(/\s+/)
+      const totalWords = allWords.length
+      const pages: string[][] = []
+
+      let currentIndex = 0
+      while (currentIndex < totalWords) {
+        const pageWords = allWords.slice(currentIndex, currentIndex + wordsPerPage)
+        const pageText = pageWords.join(' ')
+        pages.push([pageText])
+        currentIndex += wordsPerPage
+      }
+
+      return pages
+    }
+
+    // Original logic for multiple paragraphs
+    const pages: string[][] = []
+    let currentPageParagraphs: string[] = []
+    let currentWordCount = 0
+
+    for (const paragraph of allParagraphs) {
+      const words = paragraph.trim().split(/\s+/)
+      const paragraphWordCount = words.length
+
+      // If adding this paragraph exceeds the limit and we have content, start new page
+      if (currentWordCount + paragraphWordCount > wordsPerPage && currentPageParagraphs.length > 0) {
+        pages.push([...currentPageParagraphs])
+        currentPageParagraphs = [paragraph]
+        currentWordCount = paragraphWordCount
+      } else {
+        currentPageParagraphs.push(paragraph)
+        currentWordCount += paragraphWordCount
+      }
+    }
+
+    // Add remaining paragraphs as last page
+    if (currentPageParagraphs.length > 0) {
+      pages.push(currentPageParagraphs)
+    }
+
+    return pages
+  }
+
+  // Pagination functions
+  const goToNextPage = () => {
+    if (!article) return
+    const pages = splitContentByWords(article.content)
+
+    if (currentPage < pages.length - 1) {
+      setPageDirection('next')
+      setCurrentPage(currentPage + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const goToPrevPage = () => {
+    if (currentPage > 0) {
+      setPageDirection('prev')
+      setCurrentPage(currentPage - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const goToPage = (pageIndex: number) => {
+    if (!article) return
+    const pages = splitContentByWords(article.content)
+
+    if (pageIndex >= 0 && pageIndex < pages.length) {
+      setPageDirection(pageIndex > currentPage ? 'next' : 'prev')
+      setCurrentPage(pageIndex)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const handleSubmitQuiz = async () => {
@@ -428,38 +530,139 @@ export default function ArticlePage() {
         </div>
       </motion.div>
 
-      {/* Article Content */}
-      <div className="max-w-3xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 opacity-5">
-              <Image src="/images/OIP1.webp" alt="Article" fill className="object-cover" />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-background/95 to-background/98" />
+      {/* Article Content - Book Style with Pagination */}
+      <div className="max-w-4xl mx-auto">
+        {(() => {
+          const pages = splitContentByWords(article.content)
+          const totalPages = pages.length
+          const currentParagraphs = pages[currentPage] || []
 
-            <CardContent className="relative py-8 px-6 md:px-10">
-              <div className="prose dark:prose-invert max-w-none prose-lg">
-                <div className="whitespace-pre-wrap leading-relaxed text-lg">
-                  {article.content.split('\n\n').map((paragraph, index) => (
-                    <motion.p
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 * index }}
-                      className="mb-6"
-                    >
-                      {paragraph}
-                    </motion.p>
-                  ))}
+          return (
+            <>
+              <motion.div
+                key={currentPage}
+                initial={{
+                  opacity: 0,
+                  rotateY: pageDirection === 'next' ? -15 : 15,
+                  x: pageDirection === 'next' ? 50 : -50
+                }}
+                animate={{ opacity: 1, rotateY: 0, x: 0 }}
+                exit={{
+                  opacity: 0,
+                  rotateY: pageDirection === 'next' ? 15 : -15,
+                  x: pageDirection === 'next' ? -50 : 50
+                }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                style={{ perspective: '1000px' }}
+              >
+                <Card className="relative overflow-hidden shadow-2xl border-2">
+                  {/* Book-like texture background */}
+                  <div className="absolute inset-0 opacity-[0.03]">
+                    <Image src="/images/OIP1.webp" alt="Article" fill className="object-cover" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/40 via-background/98 to-orange-50/30 dark:from-slate-900/40 dark:via-background/98 dark:to-slate-800/30" />
+
+                  {/* Decorative book spine effect */}
+                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-primary/10 to-transparent" />
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-primary/10 to-transparent" />
+
+                  <CardContent className="relative py-12 px-8 md:px-16 lg:px-20 min-h-[600px] flex flex-col">
+                    {/* Decorative top border */}
+                    <div className="flex items-center justify-center mb-8">
+                      <div className="h-px w-16 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                      <BookOpen className="h-5 w-5 mx-4 text-primary/70" />
+                      <div className="h-px w-16 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                    </div>
+
+                    {/* Article content with book-style typography */}
+                    <div className="prose dark:prose-invert max-w-none prose-lg flex-1">
+                      <div
+                        className="leading-[2] text-justify"
+                        style={{
+                          fontFamily: 'Georgia, "Times New Roman", serif',
+                          textIndent: '2rem',
+                          hyphens: 'auto',
+                        }}
+                      >
+                        {currentParagraphs.map((paragraph, index) => {
+                          // Check if paragraph is a heading
+                          const isHeading = paragraph.trim().endsWith(':') ||
+                                           (paragraph.trim().length < 50 && !paragraph.includes('،') && !paragraph.includes('.'))
+
+                          if (isHeading) {
+                            return (
+                              <motion.h2
+                                key={`${currentPage}-${index}`}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.05 * index }}
+                                className="text-2xl md:text-3xl font-bold text-primary mb-6 mt-10 text-center"
+                                style={{ textIndent: '0', fontFamily: 'inherit' }}
+                              >
+                                {paragraph}
+                              </motion.h2>
+                            )
+                          }
+
+                          return (
+                            <motion.p
+                              key={`${currentPage}-${index}`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.05 * index }}
+                              className="mb-6 text-foreground/90 text-base md:text-lg"
+                            >
+                              {paragraph}
+                            </motion.p>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Page number at bottom */}
+                    <div className="flex items-center justify-center mt-8 pt-4 border-t border-border/30">
+                      <span className="text-sm text-muted-foreground font-serif">
+                        صفحة {currentPage + 1} من {totalPages}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Navigation buttons - Simplified */}
+              <div className="flex items-center justify-center mt-6 gap-6">
+                {/* Previous button */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 0}
+                  className="h-10 w-10 rounded-full"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+
+                {/* Page number */}
+                <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="text-sm font-medium text-foreground">
+                    صفحة {currentPage + 1} من {totalPages}
+                  </span>
                 </div>
+
+                {/* Next button */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages - 1}
+                  className="h-10 w-10 rounded-full"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </>
+          )
+        })()}
 
         {/* Quiz Button */}
         {survey && (
@@ -467,7 +670,7 @@ export default function ArticlePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-8"
+            className="mt-8 max-w-4xl mx-auto"
           >
             <Card className="relative overflow-hidden border-primary/50 bg-gradient-to-br from-primary/5 to-transparent">
               <CardContent className="p-6">
