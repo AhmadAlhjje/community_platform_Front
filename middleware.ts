@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // If user is not logged in and tries to access protected pages, redirect to home
+  // If user is not logged in and tries to access protected pages, redirect to login
   if (!token && isProtectedPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }

@@ -143,11 +143,12 @@ export function useAuth() {
   const logout = () => {
     clearAuth()
     toast({
-      title: 'Success',
-      description: 'Logged out successfully',
+      title: 'تم تسجيل الخروج',
+      description: 'تم تسجيل الخروج بنجاح',
       variant: 'success',
     })
-    router.push('/')
+    // Use window.location.href for full page refresh
+    window.location.href = '/'
   }
 
   const getProfile = async () => {
