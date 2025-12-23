@@ -8,8 +8,10 @@ import { Category, Article } from '@/types/api'
 import { useTranslation } from '@/hooks/use-translation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpen, CheckCircle2, ArrowRight } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BookOpen, CheckCircle2, ArrowRight, Filter } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function ArticlesPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -17,6 +19,7 @@ export default function ArticlesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const { t } = useTranslation()
+  const router = useRouter()
 
   useEffect(() => {
     fetchCategories()
@@ -87,26 +90,49 @@ export default function ArticlesPage() {
         </div>
       </motion.div>
 
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant={selectedCategory === null ? 'default' : 'outline'}
-          onClick={() => {
-            setSelectedCategory(null)
-            fetchArticles()
+      {/* Filter Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="flex items-center gap-4"
+      >
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Filter className="h-5 w-5" />
+          <span className="font-medium">تصنيف حسب:</span>
+        </div>
+        <Select
+          value={selectedCategory || 'all'}
+          onValueChange={(value) => {
+            if (value === 'all') {
+              setSelectedCategory(null)
+              fetchArticles()
+            } else {
+              handleCategoryClick(value)
+            }
           }}
         >
-          الكل
-        </Button>
-        {categories.map((category) => (
-          <Button
-            key={category.id}
-            variant={selectedCategory === category.id ? 'default' : 'outline'}
-            onClick={() => handleCategoryClick(category.id)}
-          >
-            {category.name}
-          </Button>
-        ))}
-      </div>
+          <SelectTrigger className="w-[280px] bg-background border-2 hover:border-primary/50 transition-colors">
+            <SelectValue placeholder="اختر التصنيف" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>جميع المقالات</span>
+              </div>
+            </SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span>{category.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </motion.div>
 
       {loading ? (
         <div className="flex items-center justify-center min-h-[200px]">
@@ -121,6 +147,7 @@ export default function ArticlesPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -8, scale: 1.02 }}
+              onClick={() => router.push(`/articles/${article.id}`)}
             >
               <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:border-primary/50 cursor-pointer">
                 {/* صورة الخلفية */}
@@ -159,25 +186,12 @@ export default function ArticlesPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="mt-auto relative">
-                  <Link href={`/articles/${article.id}`} className="block">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button className="w-full relative group bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                        <span className="font-semibold">
-                          {article.hasRead ? 'إعادة القراءة' : t('articles.readMore')}
-                        </span>
-                        <motion.div
-                          animate={{ x: [-3, 0, -3] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                          className="mr-2"
-                        >
-                          <ArrowRight className="h-4 w-4" />
-                        </motion.div>
-                      </Button>
-                    </motion.div>
-                  </Link>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground bg-background/50 backdrop-blur-sm rounded-lg p-3">
+                    <span className="font-medium">
+                      {article.hasRead ? 'إعادة القراءة' : 'اقرأ الآن'}
+                    </span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-[-4px] transition-transform" />
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

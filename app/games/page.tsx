@@ -133,6 +133,7 @@ export default function GamesPage() {
         transition={{ delay: index * 0.1 }}
         whileHover={{ y: -8, scale: 1.02 }}
         className="h-full"
+        onClick={() => handlePlayGame(game)}
       >
         <Card className="h-full flex flex-col relative overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:border-primary/50 cursor-pointer">
           {/* صورة الخلفية */}
@@ -182,29 +183,33 @@ export default function GamesPage() {
           </CardHeader>
 
           <CardContent className="mt-auto relative">
-            <Button
-              onClick={() => handlePlayGame(game)}
-              className="w-full transition-all"
-              variant={game.isCompleted ? 'outline' : 'default'}
-              disabled={loadingGameId === game.id}
-            >
-              {loadingGameId === game.id ? (
-                <>
-                  <LoadingSpinner size="sm" className="ml-2" />
-                  جاري التحميل...
-                </>
-              ) : game.isCompleted ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4 ml-2" />
-                  تم الإكمال
-                </>
-              ) : (
-                <>
-                  <Star className="h-4 w-4 ml-2" />
-                  العب الآن
-                </>
-              )}
-            </Button>
+            {loadingGameId === game.id ? (
+              <div className="flex items-center justify-center text-sm text-primary bg-primary/10 backdrop-blur-sm rounded-lg p-3">
+                <LoadingSpinner size="sm" className="ml-2" />
+                <span className="font-medium">جاري التحميل...</span>
+              </div>
+            ) : (
+              <div className={`flex items-center justify-between text-sm ${
+                game.isCompleted
+                  ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                  : 'text-primary bg-primary/10'
+              } backdrop-blur-sm rounded-lg p-3`}>
+                <span className="font-medium flex items-center gap-2">
+                  {game.isCompleted ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      تم الإكمال
+                    </>
+                  ) : (
+                    <>
+                      <Star className="h-4 w-4" />
+                      العب الآن
+                    </>
+                  )}
+                </span>
+                <Sparkles className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
