@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
-import { UserPlus, ArrowRight, Sparkles, Phone, Shield, AlertCircle } from 'lucide-react'
+import { UserPlus, ArrowRight, Sparkles, Phone, Shield, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 
@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showOTP, setShowOTP] = useState(false)
   const [otp, setOtp] = useState('')
@@ -240,16 +241,30 @@ export default function RegisterPage() {
                       <Label htmlFor="password" className="text-foreground font-medium">
                         {t('auth.password')}
                       </Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="أدخل كلمة المرور (8 أحرف على الأقل)"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="h-11 text-base"
-                        required
-                        minLength={8}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="أدخل كلمة المرور (8 أحرف على الأقل)"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="h-11 text-base pr-10"
+                          required
+                          minLength={8}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
 

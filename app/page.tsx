@@ -456,24 +456,6 @@ export default function Home() {
             <p className="text-base sm:text-lg text-white/95 drop-shadow-md">
               انضم إلى المستخدمين الذين يتعلمون ويتطورون على منصتنا
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href="/auth/register" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto group">
-                  إنشاء حساب
-                  <motion.div
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                  >
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </motion.div>
-                </Button>
-              </Link>
-              <Link href="/auth/login" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/30">
-                  لديّ حساب بالفعل
-                </Button>
-              </Link>
-            </div>
           </motion.div>
         </div>
       </section>

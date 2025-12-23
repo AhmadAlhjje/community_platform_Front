@@ -11,13 +11,14 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeSwitcher } from '@/components/theme-switcher'
 import { LanguageSwitcher } from '@/components/language-switcher'
-import { LogIn, ArrowRight, Sparkles, Phone } from 'lucide-react'
+import { LogIn, ArrowRight, Sparkles, Phone, Eye, EyeOff } from 'lucide-react'
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const { t } = useTranslation()
@@ -116,15 +117,29 @@ export default function LoginPage() {
                     <Label htmlFor="password" className="text-foreground font-medium">
                       {t('auth.password')}
                     </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="أدخل كلمة المرور"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 text-base"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="أدخل كلمة المرور"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-11 text-base pr-10"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </CardContent>
 
