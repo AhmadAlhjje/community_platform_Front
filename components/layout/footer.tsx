@@ -107,7 +107,7 @@ export function Footer() {
         <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-8">
           <div className="text-center">
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              © {currentYear} منصة الوعي المجتمعي. جميع الحقوق محفوظة.
+              © {currentYear} صوتنا يبني - Sotona Yabni. جميع الحقوق محفوظة.
             </p>
           </div>
         </div>

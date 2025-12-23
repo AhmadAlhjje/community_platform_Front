@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Footer } from '@/components/layout/footer'
 
 export const metadata: Metadata = {
-  title: 'منصة تعزيز الوعي المجتمعي',
+  title: 'صوتنا يبني - Sotona Yabni',
   description: 'منصة تفاعلية لتعزيز الوعي المجتمعي من خلال المقالات والألعاب التفاعلية',
 }
 
