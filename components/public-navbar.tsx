@@ -89,7 +89,7 @@ export function PublicNavbar() {
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+                  className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20"
                 >
                   <Image
                     src="/images/logo.png"
@@ -215,7 +215,7 @@ export function PublicNavbar() {
               {/* Header */}
               <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border">
                 <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 min-w-0">
-                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
+                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
                     <Image
                       src="/images/logo.png"
                       alt="صوتنا يبني"
