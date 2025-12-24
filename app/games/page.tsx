@@ -170,9 +170,9 @@ export default function GamesPage() {
               {game.title}
             </CardTitle>
 
-            <CardDescription className="line-clamp-2 text-sm mt-2 text-foreground/80 font-medium drop-shadow-sm">
+            {/* <CardDescription className="line-clamp-2 text-sm mt-2 text-foreground/80 font-medium drop-shadow-sm">
               {game.educationalMessage}
-            </CardDescription>
+            </CardDescription> */}
 
             <div className="flex items-center gap-2 mt-4">
               <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-medium">
