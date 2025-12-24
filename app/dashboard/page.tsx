@@ -129,8 +129,8 @@ export default function DashboardPage() {
             <span className="text-foreground font-bold drop-shadow-md">مرحباً بك في منصتك!</span>
           </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            أهلاً، <span className="text-primary drop-shadow-md font-extrabold">{user?.name}</span>!
+          <h1 className="text-primary text-4xl md:text-5xl font-bold">
+            أهلاً، <span className="text-black drop-shadow-md font-extrabold">{user?.name}!</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
             اختر من المميزات أدناه لبدء رحلتك التعليمية والتفاعلية

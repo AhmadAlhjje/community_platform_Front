@@ -12,7 +12,7 @@ export function useAuth() {
   const login = async (credentials: LoginRequest) => {
     try {
       const response = await apiClient.post<AuthResponse>(
-        '/api/auth/login',
+        '/api/auth/login-user',
         credentials
       )
 
