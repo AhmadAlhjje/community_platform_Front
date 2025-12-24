@@ -242,7 +242,11 @@ export function PublicNavbar() {
                   animate={{ opacity: 1, y: 0 }}
                   className="px-3 sm:px-4 py-3 sm:py-4 border-b border-border bg-muted/30"
                 >
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
                       <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
                     </div>
@@ -250,7 +254,7 @@ export function PublicNavbar() {
                       <p className="font-medium text-xs sm:text-sm text-foreground truncate">{user.name}</p>
                       <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/50">
                     <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
                     <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">{currentPoints}</span>
