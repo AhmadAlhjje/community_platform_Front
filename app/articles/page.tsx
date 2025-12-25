@@ -180,7 +180,7 @@ export default function ArticlesPage() {
                       </motion.div>
                     )}
                   </div>
-                  <CardTitle className="line-clamp-2 drop-shadow-sm text-foreground font-bold">{article.title}</CardTitle>
+                  <CardTitle className="drop-shadow-sm text-foreground font-bold">{article.title}</CardTitle>
                   <CardDescription className="line-clamp-3 text-foreground/80 font-medium drop-shadow-sm">
                     {article.content.substring(0, 150)}...
                   </CardDescription>

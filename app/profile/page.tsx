@@ -67,7 +67,7 @@ export default function ProfilePage() {
                 <UserIcon className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">الملف الشخصي</h1>
+                <h1 className="text-3xl font-bold mb-3">الملف الشخصي</h1>
                 <p className="text-muted-foreground">معلوماتك الشخصية وإنجازاتك</p>
               </div>
             </div>
