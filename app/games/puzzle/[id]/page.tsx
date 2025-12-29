@@ -462,10 +462,10 @@ export default function PuzzlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-6xl mx-auto px-4 space-y-6">
         <Link href="/games">
-          <Button variant="ghost" size="sm" className="hover:bg-white/50">
+          <Button variant="ghost" size="sm">
             <ArrowLeft className="h-4 w-4 ml-2" />
             العودة للألعاب
           </Button>
@@ -483,7 +483,7 @@ export default function PuzzlePage() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-8"
+                className="bg-background rounded-2xl shadow-2xl max-w-lg w-full p-8 border-2"
               >
                 <button
                   onClick={() => setShowSuccess(false)}
@@ -501,29 +501,29 @@ export default function PuzzlePage() {
 
                   {/* Success Message */}
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h2 className="text-3xl font-bold mb-2">
                       أحسنت! 🎉
                     </h2>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                    <p className="text-lg text-muted-foreground">
                       لقد أكملت اللعبة بنجاح
                     </p>
                   </div>
 
                   {/* Stats */}
                   <div className="flex gap-4 justify-center">
-                    <div className="bg-gray-100 dark:bg-gray-700 rounded-xl px-6 py-4 flex-1">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">النقاط</div>
+                    <div className="bg-muted rounded-xl px-6 py-4 flex-1">
+                      <div className="text-sm text-muted-foreground mb-1">النقاط</div>
                       <div className="text-2xl font-bold text-primary">+{game.pointsReward}</div>
                     </div>
-                    <div className="bg-gray-100 dark:bg-gray-700 rounded-xl px-6 py-4 flex-1">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">الحركات</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{moves}</div>
+                    <div className="bg-muted rounded-xl px-6 py-4 flex-1">
+                      <div className="text-sm text-muted-foreground mb-1">الحركات</div>
+                      <div className="text-2xl font-bold">{moves}</div>
                     </div>
                   </div>
 
                   {/* Educational Message */}
                   <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-right">
-                    <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed">
+                    <p className="text-base leading-relaxed">
                       {game.educationalMessage}
                     </p>
                   </div>
@@ -547,22 +547,22 @@ export default function PuzzlePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg">
+          <Card className="border-2">
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                  <CardTitle className="text-2xl md:text-2xl font-bold mb-2">
                     {game.title}
                   </CardTitle>
                   {puzzleData.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       {puzzleData.description}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-3 bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 text-yellow-700 dark:text-yellow-300 px-4 py-2 rounded-xl font-bold whitespace-nowrap">
-                  <Trophy className="h-5 w-5" />
-                  <span>{game.pointsReward} نقطة</span>
+                <div className="flex items-center gap-3 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 px-4 py-2 rounded-xl font-bold whitespace-nowrap">
+                  <Trophy className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+                  <span className="text-amber-900 dark:text-amber-100">{game.pointsReward} نقطة</span>
                 </div>
               </div>
             </CardHeader>
@@ -576,7 +576,7 @@ export default function PuzzlePage() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-3"
           >
-            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg">
+            <Card className="border-2">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>مربعات اللغز</span>
@@ -593,7 +593,6 @@ export default function PuzzlePage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSoundEnabled(!soundEnabled)}
-                      className="hover:bg-purple-100 dark:hover:bg-purple-900/30"
                     >
                       {soundEnabled ? (
                         <Volume2 className="h-5 w-5" />
@@ -607,8 +606,8 @@ export default function PuzzlePage() {
               <CardContent className="p-3 sm:p-6">
                 {puzzleData?.imageUrl && (
                   <div className="mb-4">
-                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">الصورة الأصلية:</div>
-                    <div className="relative w-full max-w-[200px] mx-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden shadow-md">
+                    <div className="text-sm font-medium mb-2">الصورة الأصلية:</div>
+                    <div className="relative w-full max-w-[200px] mx-auto border-2 rounded-lg overflow-hidden shadow-md">
                       <img
                         src={puzzleData.imageUrl}
                         alt="Original puzzle"
@@ -704,7 +703,7 @@ export default function PuzzlePage() {
                   <Button
                     onClick={resetGame}
                     variant="outline"
-                    className="flex-1 border-2"
+                    className="flex-1"
                     disabled={checking}
                   >
                     <RotateCcw className="h-4 w-4 ml-2" />
@@ -713,7 +712,7 @@ export default function PuzzlePage() {
                   <Button
                     onClick={checkSolution}
                     disabled={placedPieces.length !== puzzleData.pieces || checking}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                    className="flex-1"
                   >
                     {checking ? (
                       <>
@@ -738,7 +737,7 @@ export default function PuzzlePage() {
             transition={{ delay: 0.2 }}
             className="lg:col-span-2"
           >
-            <Card className="border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg lg:sticky lg:top-20">
+            <Card className="border-2 lg:sticky lg:top-20">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>قطع اللغز</span>
@@ -748,7 +747,7 @@ export default function PuzzlePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6">
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-purple-300 dark:scrollbar-thumb-purple-700 scrollbar-track-transparent">
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto p-2">
                   {pieces.map((piece) => {
                     const isPlaced = placedPieces.some(p => p.pieceId === piece.id)
                     const isSelected = selectedPiece === piece.id
@@ -762,10 +761,10 @@ export default function PuzzlePage() {
                         disabled={isPlaced}
                         className={`relative aspect-square overflow-hidden border-2 transition-all shadow-md ${
                           isSelected
-                            ? 'ring-4 ring-purple-500 ring-offset-2 border-purple-500 scale-105 shadow-xl'
+                            ? 'ring-4 ring-primary ring-offset-2 border-primary scale-105 shadow-xl'
                             : isPlaced
-                            ? 'opacity-30 cursor-not-allowed border-gray-300 grayscale'
-                            : 'border-gray-300 hover:border-purple-400 hover:shadow-lg'
+                            ? 'opacity-30 cursor-not-allowed grayscale'
+                            : 'hover:border-primary hover:shadow-lg'
                         }`}
                       >
                         <img
@@ -778,9 +777,9 @@ export default function PuzzlePage() {
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="absolute inset-0 bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center"
+                            className="absolute inset-0 bg-primary/20 border-2 border-primary flex items-center justify-center"
                           >
-                            <div className="bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            <div className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold">
                               محدد
                             </div>
                           </motion.div>
@@ -803,19 +802,22 @@ export default function PuzzlePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-6"
         >
-          <h4 className="font-bold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
-            كيفية اللعب
-          </h4>
-          <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
-            <li>✓ اختر قطعة من الجانب الأيمن</li>
-            <li>✓ انقر على مكان فارغ في الشبكة اليسرى لوضعها</li>
-            <li>✓ استخدم زر "إزالة" لحذف قطعة من مكانها</li>
-            <li>✓ عندما تنتهي، انقر على "تحقق من الحل"</li>
-            <li>✓ إذا كانت جميع القطع في أماكنها الصحيحة ستفوز!</li>
-          </ul>
+          <Card className="border-2">
+            <CardContent className="p-6">
+              <h4 className="font-bold mb-3 flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                كيفية اللعب
+              </h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>✓ اختر قطعة من الجانب الأيمن</li>
+                <li>✓ انقر على مكان فارغ في الشبكة اليسرى لوضعها</li>
+                <li>✓ استخدم زر "إزالة" لحذف قطعة من مكانها</li>
+                <li>✓ عندما تنتهي، انقر على "تحقق من الحل"</li>
+                <li>✓ إذا كانت جميع القطع في أماكنها الصحيحة ستفوز!</li>
+              </ul>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </div>
