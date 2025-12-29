@@ -582,14 +582,15 @@ export default function ArticlePage() {
                 }}
                 className="cursor-grab"
                 onDragEnd={(_, { offset, velocity }) => {
-                  const swipe = offset.x * velocity.x
+                  const swipeDistance = offset.x
+                  const swipeVelocity = velocity.x
 
-                  // Swipe right (next page) - السحب لليمين = الصفحة التالية (مثل تقليب الدفتر)
-                  if (swipe > 500 && currentPage < totalPages - 1) {
+                  // Swipe right (next page) - السحب لليمين = الصفحة التالية
+                  if (swipeDistance > 50 && swipeVelocity > 0 && currentPage < totalPages - 1) {
                     goToNextPage()
                   }
                   // Swipe left (previous page) - السحب لليسار = الصفحة السابقة
-                  else if (swipe < -500 && currentPage > 0) {
+                  else if (swipeDistance < -50 && swipeVelocity < 0 && currentPage > 0) {
                     goToPrevPage()
                   }
                 }}
