@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail } from 'lucide-react'
+import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail, HelpCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { ThemeSwitcher } from '@/components/theme-switcher'
@@ -70,6 +70,7 @@ export function PublicNavbar() {
   ]
 
   const publicNavItems = [
+    { href: '/how-it-works', label: 'كيف تعمل المنصة', icon: HelpCircle },
     { href: '/about', label: 'من نحن', icon: Info },
     { href: '/contact', label: 'تواصل معنا', icon: Mail },
   ]
@@ -79,9 +80,9 @@ export function PublicNavbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 max-w-full overflow-x-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 overflow-x-auto">
+          <div className="flex h-16 items-center justify-between min-w-max">
             {/* Left: Logo and Brand */}
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
               <Link
@@ -102,8 +103,8 @@ export function PublicNavbar() {
                 </motion.div>
               </Link>
 
-              {/* Desktop Navigation - Center */}
-              <div className="hidden md:flex items-center gap-1 md:ml-8">
+              {/* Desktop Navigation - Right */}
+              <div className="hidden xl:flex items-center gap-2 mr-auto ml-8">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
@@ -118,8 +119,8 @@ export function PublicNavbar() {
                           : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       )}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="hidden lg:inline">{item.label}</span>
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <span>{item.label}</span>
                     </Link>
                   )
                 })}
@@ -133,30 +134,29 @@ export function PublicNavbar() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/50"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700"
                 >
-                  <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{currentPoints}</span>
-                  <span className="text-xs text-amber-600 dark:text-amber-500 hidden sm:inline">
+                  <Trophy className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+                  <span className="text-base font-bold text-amber-900 dark:text-amber-100">{currentPoints}</span>
+                  <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
                     {t('common.points')}
                   </span>
                 </motion.div>
               )}
 
               {/* Theme & Language Switchers - Desktop */}
-              <div className="hidden sm:flex items-center gap-1 border-l border-border pl-2 sm:pl-3">
+              <div className="hidden xl:flex items-center gap-1 border-l border-border pl-2 sm:pl-3">
                 <ThemeSwitcher />
               </div>
 
               {/* Logout Button - Desktop (Only for logged in users) */}
               {user && (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden xl:block">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={logout}
                     aria-label={t('common.logout')}
-                    className="hidden sm:flex"
                   >
                     <LogOut className="h-5 w-5" />
                   </Button>
@@ -165,7 +165,7 @@ export function PublicNavbar() {
 
               {/* Login Button - Desktop (Only for non-logged in users) */}
               {!user && (
-                <Link href="/auth/login" className="hidden sm:block">
+                <Link href="/auth/login" className="hidden xl:block">
                   <Button variant="default" size="sm">
                     دخول
                   </Button>
@@ -178,7 +178,7 @@ export function PublicNavbar() {
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
-                className="md:hidden"
+                className="xl:hidden"
               >
                 {mobileMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -201,7 +201,7 @@ export function PublicNavbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm xl:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
 
@@ -211,7 +211,7 @@ export function PublicNavbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[280px] sm:w-80 max-w-[85vw] bg-background border-l border-border shadow-2xl md:hidden flex flex-col"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[280px] sm:w-80 max-w-[85vw] bg-background border-l border-border shadow-2xl xl:hidden flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border">
@@ -256,10 +256,10 @@ export function PublicNavbar() {
                       <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                   </Link>
-                  <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/50">
-                    <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                    <span className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">{currentPoints}</span>
-                    <span className="text-[10px] sm:text-xs text-amber-600 dark:text-amber-500">{t('common.points')}</span>
+                  <div className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700">
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-amber-700 dark:text-amber-300 flex-shrink-0" />
+                    <span className="text-sm sm:text-base font-bold text-amber-900 dark:text-amber-100">{currentPoints}</span>
+                    <span className="text-xs sm:text-sm font-medium text-amber-800 dark:text-amber-200">{t('common.points')}</span>
                   </div>
                 </motion.div>
               )}
