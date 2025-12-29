@@ -27,7 +27,8 @@
       "Bash(timeout 3 bash:*)",
       "Bash(timeout 5 bash:*)",
       "Bash(echo:*)",
-      "Bash(timeout 120 npm run build)"
+      "Bash(timeout 120 npm run build)",
+      "Bash(copy \"d:\\\\zanobia\\\\community_platform_Front\\\\google12c06702117378ee.html\" \"d:\\\\zanobia\\\\community_platform_Front\\\\public\\\\google12c06702117378ee.html\")"
     ],
     "deny": [],
     "ask": []

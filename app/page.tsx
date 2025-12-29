@@ -9,6 +9,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { Button } from "@/components/ui/button";
 import { PublicNavbar } from "@/components/public-navbar";
 import { ActivePollsTicker } from "@/components/active-polls-ticker";
+import { StructuredData } from "@/components/seo/structured-data";
 import {
   BookOpen,
   Gamepad2,
@@ -83,11 +84,15 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <PublicNavbar />
+    <>
+      <StructuredData type="website" />
+      <StructuredData type="organization" />
 
-      {/* Active Polls Ticker */}
-      <ActivePollsTicker />
+      <div className="min-h-screen bg-background overflow-x-hidden">
+        <PublicNavbar />
+
+        {/* Active Polls Ticker */}
+        <ActivePollsTicker />
 
       {/* Hero Section */}
       <section
@@ -459,6 +464,7 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

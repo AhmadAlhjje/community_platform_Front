@@ -1,0 +1,22 @@
+# *
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+
+# Allow specific public pages
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /how-it-works
+Allow: /articles
+Allow: /games
+Allow: /polls/results
+Allow: /privacy
+Allow: /terms
+
+# Sitemap
+Sitemap: https://sotonayabni.org/sitemap.xml
