@@ -81,17 +81,17 @@ export function PublicNavbar() {
   return (
     <>
       <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="w-full px-4 sm:px-6 lg:px-8 overflow-x-auto">
-          <div className="flex h-16 items-center justify-between min-w-max">
+        <div className="w-full px-3 sm:px-5 lg:px-7">
+          <div className="flex h-15 items-center justify-between">
             {/* Left: Logo and Brand */}
-            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Link
                 href={user ? "/dashboard" : "/"}
-                className="flex items-center gap-2 sm:gap-3 group"
+                className="flex items-center gap-1.5 sm:gap-2 group"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20"
+                  className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16"
                 >
                   <Image
                     src="/images/logo.png"
@@ -104,7 +104,7 @@ export function PublicNavbar() {
               </Link>
 
               {/* Desktop Navigation - Right */}
-              <div className="hidden xl:flex items-center gap-2 mr-auto ml-8">
+              <div className="hidden xl:flex items-center gap-1.5 mr-auto ml-5">
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
@@ -113,13 +113,13 @@ export function PublicNavbar() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                        'flex items-center gap-1.5 px-2.5 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap',
                         isActive
                           ? 'bg-primary text-primary-foreground shadow-sm'
                           : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       )}
                     >
-                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      <Icon className="h-4 w-4 flex-shrink-0" />
                       <span>{item.label}</span>
                     </Link>
                   )
@@ -128,16 +128,16 @@ export function PublicNavbar() {
             </div>
 
             {/* Right Side - Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Points Display - Desktop Only */}
               {user && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-300 dark:border-amber-700"
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700"
                 >
-                  <Trophy className="h-5 w-5 text-amber-700 dark:text-amber-300" />
-                  <span className="text-base font-bold text-amber-900 dark:text-amber-100">{currentPoints}</span>
+                  <Trophy className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                  <span className="text-sm font-bold text-amber-900 dark:text-amber-100">{currentPoints}</span>
                   <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
                     {t('common.points')}
                   </span>
@@ -145,7 +145,7 @@ export function PublicNavbar() {
               )}
 
               {/* Theme & Language Switchers - Desktop */}
-              <div className="hidden xl:flex items-center gap-1 border-l border-border pl-2 sm:pl-3">
+              <div className="hidden xl:flex items-center gap-1 border-l border-border pl-2">
                 <ThemeSwitcher />
               </div>
 
@@ -154,11 +154,12 @@ export function PublicNavbar() {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden xl:block">
                   <Button
                     variant="ghost"
-                    size="icon"
+                    size="sm"
                     onClick={logout}
                     aria-label={t('common.logout')}
+                    className="h-9 w-9 p-0"
                   >
-                    <LogOut className="h-5 w-5" />
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </motion.div>
               )}
@@ -166,7 +167,7 @@ export function PublicNavbar() {
               {/* Login Button - Desktop (Only for non-logged in users) */}
               {!user && (
                 <Link href="/auth/login" className="hidden xl:block">
-                  <Button variant="default" size="sm">
+                  <Button variant="default" size="sm" className="text-sm px-3 py-1.5">
                     دخول
                   </Button>
                 </Link>
