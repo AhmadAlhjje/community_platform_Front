@@ -352,9 +352,10 @@ export default function PollsPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">موعد الجلسة</p>
                       <p className="font-semibold">
-                        {new Date(latestDiscussion.dateTime).toLocaleString('ar-EG', {
+                        {new Date(latestDiscussion.dateTime).toLocaleString('en-GB', {
                           dateStyle: 'full',
                           timeStyle: 'short',
+                          calendar: 'gregory',
                         })}
                       </p>
                     </div>

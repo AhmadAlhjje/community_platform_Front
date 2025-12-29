@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
                       <div>
                         <h3 className="font-bold text-lg">{entry.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          عضو منذ {new Date(entry.memberSince).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' })}
+                          عضو منذ {new Date(entry.memberSince).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', calendar: 'gregory' })}
                         </p>
                       </div>
                     </div>

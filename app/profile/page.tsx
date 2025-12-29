@@ -112,10 +112,11 @@ export default function ProfilePage() {
                   <p className="text-sm text-muted-foreground">عضو منذ</p>
                   <p className="font-medium">
                     {userDetails?.createdAt
-                      ? new Date(userDetails.createdAt).toLocaleDateString('ar-EG', {
+                      ? new Date(userDetails.createdAt).toLocaleDateString('en-GB', {
                           year: 'numeric',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
+                          calendar: 'gregory',
                         })
                       : '-'}
                   </p>

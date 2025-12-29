@@ -1,17 +1,19 @@
 export function formatDate(date: string | Date, locale: 'ar' | 'en' = 'ar'): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+  return d.toLocaleDateString('en-GB', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    calendar: 'gregory',
   })
 }
 
 export function formatTime(date: string | Date, locale: 'ar' | 'en' = 'ar'): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return d.toLocaleTimeString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+  return d.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
+    calendar: 'gregory',
   })
 }
 

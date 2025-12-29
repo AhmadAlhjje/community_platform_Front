@@ -80,10 +80,11 @@ export default function PollDetailPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('ar-SA', {
+    return date.toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      calendar: 'gregory',
     })
   }
 
