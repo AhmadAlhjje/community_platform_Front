@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   const isAuthPage = pathname.startsWith('/auth')
-  const isPublicPage = ['/', '/about', '/contact', '/privacy', '/terms', '/community-guidelines'].includes(pathname)
+  const isPublicPage = ['/', '/about', '/contact', '/privacy', '/terms', '/community-guidelines', '/how-it-works'].includes(pathname)
   const isProtectedPage = !isPublicPage && !isAuthPage
 
   // If user is logged in and tries to access auth pages, redirect to dashboard
