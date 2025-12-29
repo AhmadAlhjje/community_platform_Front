@@ -65,6 +65,7 @@ export function PublicNavbar() {
     { href: '/articles', label: t('articles.title'), icon: BookOpen },
     { href: '/games', label: t('games.title'), icon: Gamepad2 },
     { href: '/polls', label: t('polls.title'), icon: MessageSquare },
+    { href: '/polls/results', label: 'نتائج الاستطلاعات', icon: Trophy },
     { href: '/profile', label: t('common.profile'), icon: User },
   ]
 

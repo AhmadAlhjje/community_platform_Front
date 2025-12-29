@@ -9,8 +9,9 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Clock, CheckCircle2, Video, Calendar, Award, MessageSquare, Sparkles } from 'lucide-react'
+import { Clock, CheckCircle2, Video, Calendar, Award, MessageSquare, Sparkles, BarChart3 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface PollOption {
   id: string
@@ -507,12 +508,26 @@ export default function PollsPage() {
               <span className="text-foreground font-bold drop-shadow-md">شارك برأيك!</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              صوّت وشارك في <span className="text-primary">القرارات!</span>
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
-              استبيانات مجتمعية لمعرفة آراء الجميع وبناء مستقبل أفضل
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                  صوّت وشارك في <span className="text-primary">القرارات!</span>
+                </h1>
+                <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mt-2">
+                  استبيانات مجتمعية لمعرفة آراء الجميع وبناء مستقبل أفضل
+                </p>
+              </div>
+              <Link href="/polls/results">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-primary/50 hover:bg-primary/10"
+                >
+                  <BarChart3 className="h-5 w-5 ml-2" />
+                  النتائج السابقة
+                </Button>
+              </Link>
+            </div>
           </div>
         </motion.div>
 
@@ -687,9 +702,22 @@ export default function PollsPage() {
             <span className="text-foreground font-bold drop-shadow-md">الاستبيانات المجتمعية</span>
           </motion.div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-            لا توجد استطلاعات <span className="text-primary">حالياً</span>
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                لا توجد استطلاعات <span className="text-primary">حالياً</span>
+              </h1>
+            </div>
+            <Link href="/polls/results">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+              >
+                <BarChart3 className="h-5 w-5 ml-2" />
+                عرض النتائج
+              </Button>
+            </Link>
+          </div>
           <p className="text-muted-foreground text-lg md:text-xl max-w-2xl">
             تابعنا للحصول على إشعار عند إضافة استطلاع جديد
           </p>
