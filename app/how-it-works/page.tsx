@@ -6,7 +6,6 @@ import { BookOpen, Gamepad2, MessageSquare, Mail, Heart, CheckCircle2, Trophy, M
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
-import { PublicNavbar } from '@/components/public-navbar'
 
 export default function HowItWorksPage() {
   const { user } = useAuth()
@@ -50,9 +49,7 @@ export default function HowItWorksPage() {
   ]
 
   return (
-    <>
-      <PublicNavbar />
-      <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
@@ -260,7 +257,6 @@ export default function HowItWorksPage() {
           </Card>
         </motion.div>
         </div>
-      </div>
-    </>
+    </div>
   )
 }

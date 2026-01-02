@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useTranslation } from "@/hooks/use-translation";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { PublicNavbar } from "@/components/public-navbar";
 import { Users, Target, Lightbulb, Heart, Zap, ArrowRight } from "lucide-react";
 
 const TeamMember = ({ name, role, description, image, delay }: any) => (
@@ -112,13 +111,12 @@ export default function AboutPage() {
       name: "فريق المحتوى",
       role: "Content Creation",
       description: "متخصصون في إنشاء محتوى توعوي قيّم وممتع للمستخدمين",
-      image: "/images/hero-community.webp",
+      image: "/images/فريقنا3.webp",
     },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicNavbar />
 
       {/* Hero Section */}
       <section

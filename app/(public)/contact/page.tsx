@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from '@/hooks/use-translation'
 import { Button } from '@/components/ui/button'
-import { PublicNavbar } from '@/components/public-navbar'
 import { useToast } from '@/hooks/use-toast'
 import {
   Mail,
@@ -122,7 +121,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicNavbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-12 md:py-20 border-b">
