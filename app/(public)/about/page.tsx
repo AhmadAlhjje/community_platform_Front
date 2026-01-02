@@ -32,13 +32,13 @@ const TeamMember = ({ name, role, description, image, delay }: any) => (
       </div>
 
       {/* معلومات العضو */}
-      <div className="relative p-6 space-y-2">
+      {/* <div className="relative p-6 space-y-2">
         <h3 className="text-xl font-bold text-foreground">{name}</h3>
         <p className="text-sm text-primary font-semibold">{role}</p>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {description}
         </p>
-      </div>
+      </div> */}
     </div>
   </motion.div>
 );
@@ -100,25 +100,19 @@ export default function AboutPage() {
       role: "Backend & Frontend",
       description:
         "متخصصون في بناء تطبيقات ويب قوية وموثوقة باستخدام أحدث التقنيات",
-      image: "/images/OIP1.webp",
+      image: "/images/فريقنا1.webp",
     },
     {
       name: "فريق التصميم",
       role: "UI/UX Design",
       description: "متخصصون في تصميم واجهات مستخدم جميلة وسهلة الاستخدام",
-      image: "/images/OIP2.jpeg",
+      image: "/images/فريقنا2.webp",
     },
     {
       name: "فريق المحتوى",
       role: "Content Creation",
       description: "متخصصون في إنشاء محتوى توعوي قيّم وممتع للمستخدمين",
       image: "/images/hero-community.webp",
-    },
-    {
-      name: "فريق الجودة",
-      role: "QA & Testing",
-      description: "متخصصون في اختبار وضمان جودة المنصة والخدمات",
-      image: "/images/OIP1.webp",
     },
   ];
 
