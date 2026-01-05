@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail, HelpCircle } from 'lucide-react'
+import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail, HelpCircle, Medal } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { ThemeSwitcher } from '@/components/theme-switcher'
@@ -66,6 +66,7 @@ export function PublicNavbar() {
     { href: '/games', label: t('games.title'), icon: Gamepad2 },
     { href: '/polls', label: t('polls.title'), icon: MessageSquare },
     { href: '/polls/results', label: 'نتائج الاستطلاعات', icon: Trophy },
+    { href: '/leaderboard', label: 'لوحة الصدارة', icon: Medal },
     { href: '/profile', label: t('common.profile'), icon: User },
   ]
 

@@ -785,8 +785,8 @@ export default function CrosswordPage() {
                                   text-center font-bold border-2
                                   transition-all duration-200 rounded-sm
                                   ${isBlocked
-                                    ? 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed border-gray-300 dark:border-gray-700'
-                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 cursor-pointer'
+                                    ? 'bg-gray-400 dark:bg-gray-950 cursor-not-allowed border-gray-400 dark:border-gray-900'
+                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 cursor-pointer text-gray-900 dark:text-gray-100'
                                   }
                                   ${isSelected && !isBlocked ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
                                   ${isCorrect && completed ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' : ''}

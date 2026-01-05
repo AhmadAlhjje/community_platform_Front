@@ -407,7 +407,7 @@ export default function ArticlePage() {
                             ? 'default'
                             : 'outline'
                         }
-                        className={`w-full justify-start text-right h-auto py-3 ${
+                        className={`w-full justify-start text-right h-auto py-3 px-4 ${
                           selectedAnswers[question.id] === option.id
                             ? 'bg-gradient-to-r from-primary to-primary/80 shadow-lg'
                             : ''
@@ -419,9 +419,9 @@ export default function ArticlePage() {
                           })
                         }
                       >
-                        <span className="flex-1">{option.optionText}</span>
+                        <span className="flex-1 text-right break-words whitespace-normal leading-relaxed">{option.optionText}</span>
                         {selectedAnswers[question.id] === option.id && (
-                          <CheckCircle2 className="h-5 w-5 mr-2" />
+                          <CheckCircle2 className="h-5 w-5 mr-2 flex-shrink-0" />
                         )}
                       </Button>
                     </motion.div>
