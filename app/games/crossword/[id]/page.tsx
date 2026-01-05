@@ -753,7 +753,7 @@ export default function CrosswordPage() {
                   {(() => {
                     const { cellSize, fontSize } = getGridStyles()
                     return grid.map((row, rowIndex) => (
-                      <div key={rowIndex} className="flex" style={{ height: `${cellSize}px` }}>
+                      <div key={rowIndex} className="flex" style={{ height: `${cellSize + 2}px` }}>
                         {row.map((cell, colIndex) => {
                           const isBlocked = cell === '#'
                           const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex
@@ -764,8 +764,8 @@ export default function CrosswordPage() {
                           return (
                             <div
                               key={colIndex}
-                              className="relative"
-                              style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+                              className="relative p-0.5"
+                              style={{ width: `${cellSize}px`, height: `${cellSize }px` }}
                             >
                               <input
                                 type="text"
@@ -785,7 +785,7 @@ export default function CrosswordPage() {
                                   text-center font-bold border-2
                                   transition-all duration-200 rounded-sm
                                   ${isBlocked
-                                    ? 'bg-gray-400 dark:bg-gray-950 cursor-not-allowed border-gray-400 dark:border-gray-900'
+                                    ? 'bg-gray-300 dark:bg-gray-950 cursor-not-allowed border-gray-300 dark:border-gray-900'
                                     : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-500 cursor-pointer text-gray-900 dark:text-gray-100'
                                   }
                                   ${isSelected && !isBlocked ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-900 z-10 scale-105 shadow-lg' : ''}
