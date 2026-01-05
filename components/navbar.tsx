@@ -66,7 +66,7 @@ export function Navbar() {
     { href: '/games', label: t('games.title'), icon: Gamepad2 },
     { href: '/polls', label: t('polls.title'), icon: MessageSquare },
     { href: '/polls/results', label: 'نتائج الاستطلاعات', icon: Trophy },
-    { href: '/leaderboard', label: 'لوحة الصدارة', icon: Medal },
+    // { href: '/leaderboard', label: 'لوحة الصدارة', icon: Medal },
     { href: '/profile', label: t('common.profile'), icon: User },
   ]
 

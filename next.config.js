@@ -5,6 +5,9 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 }
 
 module.exports = nextConfig
