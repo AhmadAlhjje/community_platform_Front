@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail, HelpCircle, Medal } from 'lucide-react'
+import { Home, BookOpen, Gamepad2, MessageSquare, User, LogOut, Menu, X, Trophy, Info, Mail, HelpCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useTranslation } from '@/hooks/use-translation'
 import { ThemeSwitcher } from '@/components/theme-switcher'
-import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { apiClient } from '@/lib/api-client'
@@ -76,8 +75,13 @@ export function PublicNavbar() {
     { href: '/contact', label: 'تواصل معنا', icon: Mail },
   ]
 
-  // If logged in, show authenticated navbar, otherwise show public navbar
-  const navItems = user ? [...mainNavItems, ...publicNavItems] : publicNavItems
+  const guestNavItems = [
+    { href: '/', label: 'الرئيسية', icon: Home },
+    ...publicNavItems
+  ]
+
+  // If logged in, show authenticated navbar, otherwise show guest navbar
+  const navItems = user ? [...mainNavItems, ...publicNavItems] : guestNavItems
 
   return (
     <>
@@ -308,7 +312,7 @@ export function PublicNavbar() {
 
                   {/* Public pages section */}
                   <div>
-                    {publicNavItems.map((item, index) => {
+                    {(user ? publicNavItems : guestNavItems).map((item, index) => {
                       const Icon = item.icon
                       const isActive = pathname === item.href
                       return (
@@ -316,7 +320,7 @@ export function PublicNavbar() {
                           key={item.href}
                           initial={{ opacity: 0, x: 10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: (user ? mainNavItems.length : 0) + index * 0.05 }}
+                          transition={{ delay: index * 0.05 }}
                         >
                           <Link
                             href={item.href}

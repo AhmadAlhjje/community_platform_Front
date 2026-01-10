@@ -105,7 +105,7 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: 'الهاتف',
-      description: '+9639912345678'
+      description: '+963945306743'
     },
     {
       icon: MapPin,
